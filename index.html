@@ -16,7 +16,7 @@ h1{font-size:18px;margin:0;padding:10px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 10px}
 .grid label{display:flex;gap:6px;align-items:center;font-size:13px}
 input[type=checkbox]{width:18px;height:18px;flex:none}
-input[type=text],input[type=date],input[type=time],textarea{width:100%;font:inherit;padding:6px;border:1px solid var(--bd);border-radius:3px;background:#fff}
+input[type=text],input[type=date],input[type=time],textarea,select{width:100%;font:inherit;padding:6px;border:1px solid var(--bd);border-radius:3px;background:#fff}
 textarea{min-height:80px;resize:vertical}
 .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
 .row label{font-size:12px;color:var(--mut);display:block}
@@ -43,6 +43,7 @@ button.clr{background:#999}
 .bar{max-width:820px;margin:10px auto;display:flex;flex-wrap:wrap;gap:8px;padding:0 8px}
 .bar button{flex:1 1 30%;padding:12px}
 .bar .clr{flex:1 1 100%}
+input[readonly]{background:#f0f0f0;color:#333}
 .err{outline:2px solid #d32f2f;background:#fff0f0!important}
 @media(max-width:560px){.photos,.sign{grid-template-columns:1fr}.slot+.slot,.sign>div+div{border-left:0;border-top:1px solid var(--bd)}}
 @media print{
@@ -56,7 +57,7 @@ button.clr{background:#999}
  .slot+.slot,.sign>div+div{border-left:1px solid #000!important;border-top:0!important}
  .grid{grid-template-columns:repeat(5,1fr)}
  textarea{min-height:50px}
- input,textarea{border-color:#000}
+ input,textarea,select{border-color:#000}
  .sec,.photos,.sign{break-inside:avoid}
 }
 </style>
@@ -69,8 +70,8 @@ button.clr{background:#999}
 
  <div class="sec"><b>Report Reference Information:</b>
   <div class="ref">
-   <div><label>Department</label><input type="text" value="LSS"></div>
-   <div><label>No</label><input type="text"></div>
+   <div><label>Department</label><select id="dept"><option>LSS</option><option>ENG</option></select></div>
+   <div><label>No</label><input type="text" id="no" class="opt" readonly placeholder="otomatis"></div>
    <div class="full msb">MSB/FL/ <input type="text"> / <input type="text"> / <input type="text"></div>
   </div>
  </div>
@@ -85,7 +86,7 @@ button.clr{background:#999}
    <div><label>Name</label><input type="text"></div>
    <div><label>Designation</label><input type="text"></div>
    <div><label>Date</label><input type="date"></div>
-   <div><label>Time</label><input type="time"></div>
+   <div><label>Time</label><input type="time" id="rtime" readonly></div>
   </div>
  </div>
  <div class="sec"><b>Root Cause / Identification:</b><textarea></textarea></div>
@@ -173,22 +174,39 @@ function savePdf(disc){
  }
  const btns=[...document.querySelectorAll('.bar .sv')],old=btns.map(b=>b.textContent);
  const reset=()=>btns.forEach((b,i)=>{b.disabled=false;b.textContent=old[i]});
- const doPrint=()=>{reset();const t=document.title;document.title='MSB-FL-'+refCode()+'_'+disc;window.print();document.title=t};
+ let n=0;
+ const doPrint=()=>{reset();const t=document.title;document.title=base(n)+'_'+disc;window.print();document.title=t};
+ $('rtime').value=nowTime();
  btns.forEach(b=>{b.disabled=true;b.textContent='Mengupload foto...'});
- uploadPhotos(disc).then(doPrint)
-  .catch(e=>{reset();if(confirm('Upload foto gagal ('+e.message+'). Tetap cetak PDF?'))doPrint()});
+ api({action:'reserve'})
+  .then(j=>{n=j.number;$('no').value=pad(n);return uploadPhotos(disc,n)})
+  .then(doPrint)
+  .catch(e=>{reset();
+   if(n){if(confirm('Upload foto gagal ('+e.message+'). Tetap cetak PDF?'))doPrint()}
+   else alert('Gagal mengambil nomor ('+e.message+'). Coba lagi.');});
 }
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(4,'0');
+const nowTime=()=>{const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
 function refCode(){return [...document.querySelectorAll('.msb input')].map(i=>i.value.trim().replace(/[^\w-]/g,'')).join('-')||'form'}
-async function uploadPhotos(disc){
- const ref=refCode();
+const base=n=>'MSB-FL-'+pad(n)+'_'+refCode();
+async function api(body){
+ const r=await fetch(UPLOAD_URL,{method:'POST',body:JSON.stringify(Object.assign({token:TOKEN},body))});
+ const j=await r.json();
+ if(!j.ok)throw new Error(j.error);
+ return j;
+}
+async function uploadPhotos(disc,n){
  const ts=new Date().toISOString().slice(0,16).replace(/[:T]/g,'-');
  for(const t of ['before','after']){
   const src=document.querySelector('#'+t+' .box img').src;
-  const r=await fetch(UPLOAD_URL,{method:'POST',body:JSON.stringify({token:TOKEN,type:t,name:'MSB-FL-'+ref+'_'+disc+'_'+t+'_'+ts+'.jpg',data:src.split(',')[1]})});
-  const j=await r.json();
-  if(!j.ok)throw new Error(j.error);
+  await api({type:t,name:base(n)+'_'+disc+'_'+t+'_'+ts+'.jpg',data:src.split(',')[1]});
  }
 }
+
+// waktu otomatis + nomor berikutnya (preview) dari server
+$('rtime').value=nowTime();
+fetch(UPLOAD_URL+'?token='+encodeURIComponent(TOKEN)).then(r=>r.json()).then(j=>{if(j.ok)$('no').value=pad(j.next)}).catch(()=>{});
 </script>
 </body>
 </html>
