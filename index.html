@@ -1,4 +1,4 @@
-F<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -26,8 +26,6 @@ textarea{min-height:80px;resize:vertical}
 .msb input{width:60px;text-align:center}
 .msb{flex-wrap:wrap}
 .msb select{width:auto;padding:6px 4px;text-align:center}
-.msb #deptbox{width:60px}
-.msb #discbox{width:105px}
 .photos{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--bd)}
 .slot{padding:8px 10px}
 .slot+.slot{border-left:1px solid var(--bd)}
@@ -74,14 +72,15 @@ input[readonly]{background:#f0f0f0;color:#333}
  <div class="sub">Marine Safari Bali</div>
 
  <div class="sec"><b>Report Reference Information:</b>
-<div class="ref">
- <div><label>No</label><input type="text" id="no" class="opt" readonly placeholder="otomatis"></div>
- <div class="full msb">MSB/FL/
-  <select id="dept"><option>LSS</option><option>ENG</option></select> /
-  <select id="disc"><option>Electrical</option><option>Mechanical</option><option>Instrument</option><option>Seaworld</option></select> /
-  <input type="text" placeholder="Year"> / <input type="text" placeholder="Month"> / <input type="text" placeholder="Date">
+  <div class="ref">
+   <div><label>No</label><input type="text" id="no" class="opt" readonly placeholder="otomatis"></div>
+   <div class="full msb">MSB/FL/
+    <select id="dept"><option>LSS</option><option>ENG</option></select> /
+    <select id="disc"><option>Electrical</option><option>Mechanical</option><option>Instrument</option><option>Seaworld</option></select> /
+    <input type="text" placeholder="Year"> / <input type="text" placeholder="Month"> / <input type="text" placeholder="Date">
+   </div>
+  </div>
  </div>
-</div>
 
  <div class="sec"><b>Area:</b><div class="grid" id="area"></div></div>
  <div class="sec"><b>Equipment/Utility Type:</b><div class="grid" id="equip"></div>
@@ -89,13 +88,13 @@ input[readonly]{background:#f0f0f0;color:#333}
  </div>
  <div class="sec"><b>Faulty Issue:</b><textarea></textarea></div>
  <div class="sec"><b>Reported by:</b>
- <div class="row">
-  <div><label>Name</label><input type="text"></div>
-  <div><label>Designation</label><input type="text"></div>
-  <div><label>Date</label><input type="date"></div>
-  <div><label>Time</label><input type="time" id="rtime" readonly></div>
+  <div class="row">
+   <div><label>Name</label><input type="text"></div>
+   <div><label>Designation</label><input type="text"></div>
+   <div><label>Date</label><input type="date"></div>
+   <div><label>Time</label><input type="time" id="rtime"></div>
+  </div>
  </div>
-</div>
  <div class="sec"><b>Root Cause / Identification:</b><textarea></textarea></div>
 
  <div class="photos">
@@ -183,7 +182,6 @@ function savePdf(disc){
  const reset=()=>btns.forEach((b,i)=>{b.disabled=false;b.textContent=old[i]});
  let n=0;
  const doPrint=()=>{reset();const t=document.title;document.title=base(n)+'_'+disc;window.print();document.title=t};
- $('rtime').value=nowTime();
  btns.forEach(b=>{b.disabled=true;b.textContent='Mengupload foto...'});
  api({action:'reserve'})
   .then(j=>{n=j.number;$('no').value=pad(n);return uploadPhotos(disc,n)})
@@ -194,8 +192,7 @@ function savePdf(disc){
 }
 const $=id=>document.getElementById(id);
 const pad=n=>String(n).padStart(4,'0');
-const nowTime=()=>{const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
-function refCode(){return [...document.querySelectorAll('.msb input')].map(i=>i.value.trim().replace(/[^\w-]/g,'')).join('-')||'form'}
+function refCode(){return [...document.querySelectorAll('.msb input,.msb select')].map(i=>i.value.trim().replace(/[^\w-]/g,'')).join('-')||'form'}
 const base=n=>'MSB-FL-'+pad(n)+'_'+refCode();
 async function api(body){
  const r=await fetch(UPLOAD_URL,{method:'POST',body:JSON.stringify(Object.assign({token:TOKEN},body))});
@@ -210,20 +207,6 @@ async function uploadPhotos(disc,n){
   await api({type:t,name:base(n)+'_'+disc+'_'+t+'_'+ts+'.jpg',data:src.split(',')[1]});
  }
 }
-
-// kotak departemen & discipline di MSB/FL/ ikut pilihan dropdown
-const syncRef=()=>{$('deptbox').value=$('dept').value;$('discbox').value=$('disc').value};
-$('dept').addEventListener('change',syncRef);
-$('disc').addEventListener('change',syncRef);
-syncRef();
-
-// hanya jam (Time) yang otomatis, ganti tiap menit
-function tickTime(){
- $('rtime').value=nowTime();
- setTimeout(tickTime,60000-(Date.now()%60000)+50);
-}
-tickTime();
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)$('rtime').value=nowTime()});
 
 // nomor berikutnya (preview) dari server
 fetch(UPLOAD_URL+'?token='+encodeURIComponent(TOKEN)).then(r=>r.json()).then(j=>{if(j.ok)$('no').value=pad(j.next)}).catch(()=>{});
