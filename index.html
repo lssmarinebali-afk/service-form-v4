@@ -20,13 +20,12 @@ input[type=text],input[type=date],input[type=time],textarea,select{width:100%;fo
 textarea{min-height:80px;resize:vertical}
 .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
 .row label{font-size:12px;color:var(--mut);display:block}
-.ref{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px}
-.ref>div:first-child{display:flex;align-items:center;gap:10px}
+.ref{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
 .ref label{margin:0;font-weight:600}
-#no{width:90px;text-align:center}
-.msb{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
-.msb input{width:70px;text-align:center}
-.msb select{width:auto;padding:6px 10px;text-align:center}
+#no{width:70px;text-align:center}
+.msb{display:flex;align-items:center;gap:6px;margin-left:16px}
+.msb input{width:54px;text-align:center}
+.msb select{width:auto;padding:6px 6px;text-align:center}
 .photos{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--bd)}
 .slot{padding:8px 10px}
 .slot+.slot{border-left:1px solid var(--bd)}
@@ -73,15 +72,15 @@ input[readonly]{background:#f0f0f0;color:#333}
  <div class="sub">Marine Safari Bali</div>
 
  <div class="sec"><b>Report Reference Information:</b>
-  <div class="ref">
-   <div><label>No</label><input type="text" id="no" class="opt" readonly placeholder="otomatis"></div>
-   <div class="full msb">MSB/FL/
-    <select id="dept"><option>LSS</option><option>ENG</option></select> /
-    <select id="disc"><option>Electrical</option><option>Mechanical</option><option>Instrument</option><option>Seaworld</option></select> /
-    <input type="text" placeholder="Year"> / <input type="text" placeholder="Month"> / <input type="text" placeholder="Date">
-   </div>
-  </div>
+ <div class="ref">
+ <label for="no">No</label>
+ <input type="text" id="no" class="opt" readonly placeholder="otomatis">
+ <div class="msb">MSB/FL/
+  <select id="dept"><option>LSS</option><option>ENG</option></select> /
+  <select id="disc"><option>Electrical</option><option>Mechanical</option><option>Instrument</option><option>Seaworld</option></select> /
+  <input type="text" placeholder="Year"> / <input type="text" placeholder="Month"> / <input type="text" placeholder="Date">
  </div>
+</div>
 
  <div class="sec"><b>Area:</b><div class="grid" id="area"></div></div>
  <div class="sec"><b>Equipment/Utility Type:</b><div class="grid" id="equip"></div>
