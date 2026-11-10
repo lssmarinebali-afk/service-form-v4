@@ -72,7 +72,7 @@ input[readonly]{background:#f0f0f0;color:#333}
   <div class="ref">
    <div><label>Department</label><select id="dept"><option>LSS</option><option>ENG</option></select></div>
    <div><label>No</label><input type="text" id="no" class="opt" readonly placeholder="otomatis"></div>
-   <div class="full msb">MSB/FL/ <input type="text"> / <input type="text"> / <input type="text"></div>
+   <div class="full msb">MSB/FL/ <input type="text" id="deptbox" readonly> / <input type="text" placeholder="Year"> / <input type="text" placeholder="Month"> / <input type="text" placeholder="Date"></div>
   </div>
  </div>
 
@@ -204,8 +204,20 @@ async function uploadPhotos(disc,n){
  }
 }
 
-// waktu otomatis + nomor berikutnya (preview) dari server
-$('rtime').value=nowTime();
+// kotak departemen di MSB/FL/ ikut pilihan LSS / ENG
+const syncDept=()=>{$('deptbox').value=$('dept').value};
+$('dept').addEventListener('change',syncDept);
+syncDept();
+
+// jam otomatis: ganti tiap menit (tepat di pergantian menit), tanpa refresh
+function tickTime(){
+ $('rtime').value=nowTime();
+ setTimeout(tickTime,60000-(Date.now()%60000)+50);
+}
+tickTime();
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)$('rtime').value=nowTime()});
+
+// nomor berikutnya (preview) dari server
 fetch(UPLOAD_URL+'?token='+encodeURIComponent(TOKEN)).then(r=>r.json()).then(j=>{if(j.ok)$('no').value=pad(j.next)}).catch(()=>{});
 </script>
 </body>
