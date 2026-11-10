@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Service Request Form – Fault List | Marine Safari Bali</title>
+<style>
+:root{--bd:#222;--mut:#666;--acc:#0a6ebd}
+*{box-sizing:border-box}
+body{font:14px/1.35 system-ui,Arial,sans-serif;margin:0;background:#eef1f4;color:#111}
+.page{max-width:820px;margin:0 auto;background:#fff;border:1px solid var(--bd)}
+h1{font-size:18px;margin:0;padding:10px}
+.sub{padding:0 10px 8px;font-weight:700}
+.sec{border-top:1px solid var(--bd);padding:8px 10px}
+.sec>b{display:block;margin-bottom:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 10px}
+.grid label{display:flex;gap:6px;align-items:center;font-size:13px}
+input[type=checkbox]{width:18px;height:18px;flex:none}
+input[type=text],input[type=date],input[type=time],textarea{width:100%;font:inherit;padding:6px;border:1px solid var(--bd);border-radius:3px;background:#fff}
+textarea{min-height:80px;resize:vertical}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.row label{font-size:12px;color:var(--mut);display:block}
+.ref{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ref .full{grid-column:1/-1}
+.msb{display:flex;gap:4px;align-items:center}
+.msb input{width:60px;text-align:center}
+.photos{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--bd)}
+.slot{padding:8px 10px}
+.slot+.slot{border-left:1px solid var(--bd)}
+.box{height:230px;border:1px solid var(--bd);margin:6px 0;display:flex;align-items:center;justify-content:center;background:#f6f8fa;overflow:hidden}
+.box img{max-width:100%;max-height:100%;object-fit:contain}
+.box span{color:var(--mut);font-size:12px;text-align:center;padding:6px}
+.btns{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;padding:9px 12px;border:0;border-radius:6px;background:var(--acc);color:#fff;cursor:pointer}
+button.alt{background:#2f7d32}
+button.clr{background:#999}
+.sign{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--bd)}
+.sign>div{padding:8px 10px}
+.sign>div+div{border-left:1px solid var(--bd)}
+.sign h3{margin:0 0 6px;text-align:center;font-size:14px}
+.sign .row{grid-template-columns:1fr 1fr}
+.foot{text-align:right;font-size:10px;color:var(--mut);padding:6px 10px}
+.bar{max-width:820px;margin:10px auto;display:flex;gap:8px;padding:0 8px}
+.bar button{flex:1;padding:12px}
+@media(max-width:560px){.photos,.sign{grid-template-columns:1fr}.slot+.slot,.sign>div+div{border-left:0;border-top:1px solid var(--bd)}}
+@media print{
+ @page{size:A4;margin:8mm}
+ body{background:#fff;font-size:10px}
+ .bar,.btns{display:none}
+ .page{border:1px solid #000;max-width:none}
+ .box{height:260px}
+ .box span{display:none}
+ .photos,.sign{grid-template-columns:1fr 1fr!important}
+ .slot+.slot,.sign>div+div{border-left:1px solid #000!important;border-top:0!important}
+ .grid{grid-template-columns:repeat(5,1fr)}
+ textarea{min-height:50px}
+ input,textarea{border-color:#000}
+ .sec,.photos,.sign{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="bar"><button onclick="window.print()">Simpan / Cetak PDF</button><button class="clr" onclick="if(confirm('Kosongkan semua isian?'))location.reload()">Reset</button></div>
+<div class="page">
+ <h1>SERVICE REQUEST FORM – FAULT LIST</h1>
+ <div class="sub">Marine Safari Bali</div>
+
+ <div class="sec"><b>Report Reference Information:</b>
+  <div class="ref">
+   <div><label>Department</label><input type="text" value="LSS"></div>
+   <div><label>No</label><input type="text"></div>
+   <div class="full msb">MSB/FL/ <input type="text"> / <input type="text"> / <input type="text"></div>
+  </div>
+ </div>
+
+ <div class="sec"><b>Area:</b><div class="grid" id="area"></div></div>
+ <div class="sec"><b>Equipment/Utility Type:</b><div class="grid" id="equip"></div>
+  <div style="margin-top:8px"><b style="display:inline">Other:</b><input type="text"></div>
+ </div>
+ <div class="sec"><b>Faulty Issue:</b><textarea></textarea></div>
+ <div class="sec"><b>Reported by:</b>
+  <div class="row">
+   <div><label>Name</label><input type="text"></div>
+   <div><label>Designation</label><input type="text"></div>
+   <div><label>Date</label><input type="date"></div>
+   <div><label>Time</label><input type="time"></div>
+  </div>
+ </div>
+ <div class="sec"><b>Root Cause / Identification:</b><textarea></textarea></div>
+
+ <div class="photos">
+  <div class="slot" id="before"><b>Photo Before Rectification</b>
+   <div class="box"><span>Belum ada foto</span></div>
+   <div class="btns"><button data-k="cam">📷 Ambil Foto</button><button class="alt" data-k="gal">🖼️ Galeri</button><button class="clr" data-k="clr">Hapus</button></div>
+  </div>
+  <div class="slot" id="after"><b>Photo After Rectification</b>
+   <div class="box"><span>Belum ada foto</span></div>
+   <div class="btns"><button data-k="cam">📷 Ambil Foto</button><button class="alt" data-k="gal">🖼️ Galeri</button><button class="clr" data-k="clr">Hapus</button></div>
+  </div>
+ </div>
+
+ <div class="sec"><b>Rectification Done:</b><textarea></textarea></div>
+
+ <div class="sign">
+  <div><h3>Rectified by:</h3><div class="row">
+   <div><label>Name</label><input type="text"></div><div><label>Date</label><input type="date"></div>
+   <div><label>Designation</label><input type="text"></div><div><label>Time</label><input type="time"></div></div></div>
+  <div><h3>Checked by:</h3><div class="row">
+   <div><label>Name</label><input type="text"></div><div><label>Date</label><input type="date"></div>
+   <div><label>Designation</label><input type="text"></div><div><label>Time</label><input type="time"></div></div></div>
+ </div>
+ <div class="foot">MSB/FL/ENG/101126/v3</div>
+</div>
+
+<script>
+const AREA=["Plaza","Sealion","Rocky Shores Toilet","Penguin","Tunnel","Dolphin Show","Encounter Facility","Education Center","Prep. Kitchen","Lab & Hospital","Marine BOH","Ara Cafe","Pachamaya","Jungle Odyssey","Varuna","Estuary","River Cafe","Plaza Toilet","Theater Tank","Employee Facility","PR1","PR2","PR3","PR4","SWS"];
+const EQUIP=["Light","Light Switch","Power Outlet","AC","Fan","Exhaust Fan","Freezer","Chiller","Door Panel","Door Lock/Key","Door Hinges","Door Handle","Door Closer","Water Tap","Jet Shower","Shower Hose","Hand Dryer","Soap Dispenser","Floor Drain","Closet","Urinal","Concrete Floor","Wooden Floor","Wall","Hand Rail","Roof","Ceiling/Plafond","Fresh Water Pipe","Water Tank","Circulation Pump","Vacuum Pump","Air Pump","Drain Pump","Sea Water Pipe","Ozone Line","Sand Filter","Drum Filter","Compressor","Ozone Generator","UV Light","ORP Display","Chiller Display"];
+const fill=(id,list)=>document.getElementById(id).innerHTML=list.map(t=>`<label><input type="checkbox"> ${t.replace(/&/g,'&amp;')}</label>`).join("");
+fill("area",AREA);fill("equip",EQUIP);
+
+// foto: kamera / galeri, dikecilkan supaya PDF tidak berat
+function shrink(file,max=1280){
+ return new Promise(res=>{
+  const img=new Image(),url=URL.createObjectURL(file);
+  img.onload=()=>{
+   const s=Math.min(1,max/Math.max(img.width,img.height));
+   const c=document.createElement("canvas");c.width=img.width*s;c.height=img.height*s;
+   c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+   URL.revokeObjectURL(url);res(c.toDataURL("image/jpeg",.82));
+  };
+  img.src=url;
+ });
+}
+document.querySelectorAll(".slot").forEach(slot=>{
+ const box=slot.querySelector(".box");
+ const mk=cam=>{
+  const i=document.createElement("input");i.type="file";i.accept="image/*";
+  if(cam)i.capture="environment";
+  i.onchange=async()=>{
+   if(!i.files[0])return;
+   box.innerHTML="";
+   const im=new Image();im.src=await shrink(i.files[0]);box.appendChild(im);
+   i.value="";
+  };
+  return i;
+ };
+ const cam=mk(true),gal=mk(false);
+ slot.querySelector('[data-k=cam]').onclick=()=>cam.click();
+ slot.querySelector('[data-k=gal]').onclick=()=>gal.click();
+ slot.querySelector('[data-k=clr]').onclick=()=>box.innerHTML="<span>Belum ada foto</span>";
+});
+</script>
+</body>
+</html>
