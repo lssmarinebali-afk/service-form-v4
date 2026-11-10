@@ -204,7 +204,6 @@ function savePdf(){
  const reset=()=>btns.forEach((b,i)=>{b.disabled=false;b.textContent=old[i]});
  let n=0;
  const doPrint=()=>{reset();const t=document.title;document.title=base(n);window.print();document.title=t};
- $('rtime').value=nowTime();
  btns.forEach(b=>{b.disabled=true;b.textContent='Mengupload foto...'});
  api({action:'reserve'})
   .then(j=>{n=j.number;$('no').value=pad(n);return uploadPhotos(n)})
