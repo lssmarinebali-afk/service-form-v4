@@ -20,13 +20,13 @@ input[type=text],input[type=date],input[type=time],textarea,select{width:100%;fo
 textarea{min-height:80px;resize:vertical}
 .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
 .row label{font-size:12px;color:var(--mut);display:block}
-.ref{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.ref .full{grid-column:1/-1}
-.msb{display:flex;gap:4px;align-items:center}
-.msb input{width:60px;text-align:center}
-.msb{flex-wrap:wrap}
-.msb select{width:auto;padding:6px 4px;text-align:center}
+.ref{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px}
+.ref>div:first-child{display:flex;align-items:center;gap:10px}
+.ref label{margin:0;font-weight:600}
 #no{width:90px;text-align:center}
+.msb{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.msb input{width:70px;text-align:center}
+.msb select{width:auto;padding:6px 10px;text-align:center}
 .photos{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--bd)}
 .slot{padding:8px 10px}
 .slot+.slot{border-left:1px solid var(--bd)}
