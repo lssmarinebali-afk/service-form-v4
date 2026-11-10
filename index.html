@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+F<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -24,6 +24,8 @@ textarea{min-height:80px;resize:vertical}
 .ref .full{grid-column:1/-1}
 .msb{display:flex;gap:4px;align-items:center}
 .msb input{width:60px;text-align:center}
+.msb{flex-wrap:wrap}
+.msb select{width:auto;padding:6px 4px;text-align:center}
 .msb #deptbox{width:60px}
 .msb #discbox{width:105px}
 .photos{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--bd)}
@@ -49,6 +51,7 @@ input[readonly]{background:#f0f0f0;color:#333}
 .err{outline:2px solid #d32f2f;background:#fff0f0!important}
 @media(max-width:560px){.photos,.sign{grid-template-columns:1fr}.slot+.slot,.sign>div+div{border-left:0;border-top:1px solid var(--bd)}}
 @media print{
+ .msb select{-webkit-appearance:none;appearance:none;padding:6px 8px}
  @page{size:A4;margin:8mm}
  body{background:#fff;font-size:10px}
  .bar,.btns{display:none}
@@ -71,11 +74,13 @@ input[readonly]{background:#f0f0f0;color:#333}
  <div class="sub">Marine Safari Bali</div>
 
  <div class="sec"><b>Report Reference Information:</b>
- <div class="ref">
- <div><label>Department</label><select id="dept"><option>LSS</option><option>ENG</option></select></div>
- <div><label>Discipline</label><select id="disc"><option>Electrical</option><option>Mechanical</option><option>Instrument</option><option>Seaworld</option></select></div>
+<div class="ref">
  <div><label>No</label><input type="text" id="no" class="opt" readonly placeholder="otomatis"></div>
- <div class="full msb">MSB/FL/ <input type="text" id="deptbox" readonly> / <input type="text" id="discbox" readonly> / <input type="text" placeholder="Year"> / <input type="text" placeholder="Month"> / <input type="text" placeholder="Date"></div>
+ <div class="full msb">MSB/FL/
+  <select id="dept"><option>LSS</option><option>ENG</option></select> /
+  <select id="disc"><option>Electrical</option><option>Mechanical</option><option>Instrument</option><option>Seaworld</option></select> /
+  <input type="text" placeholder="Year"> / <input type="text" placeholder="Month"> / <input type="text" placeholder="Date">
+ </div>
 </div>
 
  <div class="sec"><b>Area:</b><div class="grid" id="area"></div></div>
