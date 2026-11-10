@@ -66,8 +66,7 @@ input[readonly]{background:#f0f0f0;color:#333}
 </style>
 </head>
 <body>
-<div class="bar"><button class="sv" onclick="savePdf('Electrical')">Simpan: Electrical</button><button class="sv" onclick="savePdf('Mechanical')">Simpan: Mechanical</button><button class="sv" onclick="savePdf('Instrument')">Simpan: Instrument</button><button class="clr" onclick="if(confirm('Kosongkan semua isian?'))location.reload()">Reset</button></div>
-<div class="page">
+<div class="bar"><button class="sv" onclick="savePdf()">Simpan</button><button class="clr" onclick="if(confirm('Kosongkan semua isian?'))location.reload()">Reset</button></div><div class="page">
  <h1>SERVICE REQUEST FORM – FAULT LIST</h1>
  <div class="sub">Marine Safari Bali</div>
 
@@ -164,9 +163,9 @@ document.querySelectorAll(".slot").forEach(slot=>{
 // wajib lengkap sebelum bisa simpan/cetak PDF (kolom "Other" boleh kosong)
 document.addEventListener('input',e=>e.target.classList.remove('err'));
 document.addEventListener('change',e=>{const g=e.target.closest('.grid');if(g)g.classList.remove('err')});
-function savePdf(disc){
+function savePdf(){
  document.querySelectorAll('.err').forEach(e=>e.classList.remove('err'));
- const bad=[];
+ const doPrint=()=>{reset();const t=document.title;document.title=base(n);window.print();document.title=t};
  document.querySelectorAll('.page input[type=text],.page input[type=date],.page input[type=time],.page textarea').forEach(el=>{
   if(!el.classList.contains('opt')&&!el.value.trim()){el.classList.add('err');bad.push(el)}
  });
@@ -184,7 +183,7 @@ function savePdf(disc){
  const doPrint=()=>{reset();const t=document.title;document.title=base(n)+'_'+disc;window.print();document.title=t};
  btns.forEach(b=>{b.disabled=true;b.textContent='Mengupload foto...'});
  api({action:'reserve'})
-  .then(j=>{n=j.number;$('no').value=pad(n);return uploadPhotos(disc,n)})
+  .then(j=>{n=j.number;$('no').value=pad(n);return uploadPhotos(n)})
   .then(doPrint)
   .catch(e=>{reset();
    if(n){if(confirm('Upload foto gagal ('+e.message+'). Tetap cetak PDF?'))doPrint()}
@@ -200,11 +199,11 @@ async function api(body){
  if(!j.ok)throw new Error(j.error);
  return j;
 }
-async function uploadPhotos(disc,n){
+async function uploadPhotos(n){
  const ts=new Date().toISOString().slice(0,16).replace(/[:T]/g,'-');
  for(const t of ['before','after']){
   const src=document.querySelector('#'+t+' .box img').src;
-  await api({type:t,name:base(n)+'_'+disc+'_'+t+'_'+ts+'.jpg',data:src.split(',')[1]});
+  await api({type:t,name:base(n)+'_'+t+'_'+ts+'.jpg',data:src.split(',')[1]});
  }
 }
 
