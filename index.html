@@ -22,11 +22,14 @@ textarea{min-height:80px;resize:vertical}
 .row label{font-size:12px;color:var(--mut);display:block}
 .ref{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
 .ref label{margin:0;font-weight:600}
-#no{width:70px;text-align:center}
+#no{width:64px;text-align:center}
 .msb{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-left:12px}
-.g{display:flex;align-items:center;gap:4px;white-space:nowrap}
-.msb input{width:52px;text-align:center;padding:6px 2px}
-.msb select{width:auto;padding:6px 4px;text-align:center}
+.g{display:flex;align-items:center;gap:5px;white-space:nowrap}
+#no,.msb input,.msb select{height:34px;font-size:13px;padding:0 6px;text-align:center}
+.msb select{width:auto}
+.msb input{width:60px}
+.msb input[placeholder=Month]{width:68px}
+.msb input::placeholder{font-size:12px}
 .photos{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--bd)}
 .slot{padding:8px 10px}
 .slot+.slot{border-left:1px solid var(--bd)}
