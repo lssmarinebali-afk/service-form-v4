@@ -96,7 +96,7 @@ input[readonly]{background:#f0f0f0;color:#333}
    <div><label>Name</label><input type="text"></div>
    <div><label>Designation</label><input type="text"></div>
    <div><label>Date</label><input type="date"></div>
-   <div><label>Time</label><input type="time" id="rtime" readonly></div>
+   <div><label>Time</label><input type="time"></div>
   </div>
  </div>
  <div class="sec"><b>Root Cause / Identification:</b><textarea></textarea></div>
@@ -214,8 +214,6 @@ function savePdf(){
    else alert('Gagal mengambil nomor ('+e.message+'). Coba lagi.');});
 }
 
-// waktu otomatis + nomor berikutnya (preview) dari server
-$('rtime').value=nowTime();
 fetch(UPLOAD_URL+'?token='+encodeURIComponent(TOKEN)).then(r=>r.json()).then(j=>{if(j.ok)$('no').value=pad(j.next)}).catch(()=>{});
 </script>
 </body>
