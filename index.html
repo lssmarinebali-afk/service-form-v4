@@ -23,9 +23,10 @@ textarea{min-height:80px;resize:vertical}
 .ref{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
 .ref label{margin:0;font-weight:600}
 #no{width:70px;text-align:center}
-.msb{display:flex;align-items:center;gap:6px;margin-left:16px}
-.msb input{width:54px;text-align:center}
-.msb select{width:auto;padding:6px 6px;text-align:center}
+.msb{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-left:12px}
+.g{display:flex;align-items:center;gap:4px;white-space:nowrap}
+.msb input{width:52px;text-align:center;padding:6px 2px}
+.msb select{width:auto;padding:6px 4px;text-align:center}
 .photos{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--bd)}
 .slot{padding:8px 10px}
 .slot+.slot{border-left:1px solid var(--bd)}
@@ -47,7 +48,7 @@ button.clr{background:#999}
 .bar .clr{flex:1 1 100%}
 input[readonly]{background:#f0f0f0;color:#333}
 .err{outline:2px solid #d32f2f;background:#fff0f0!important}
-@media(max-width:560px){.photos,.sign{grid-template-columns:1fr}.slot+.slot,.sign>div+div{border-left:0;border-top:1px solid var(--bd)}.msb{margin-left:0;flex-wrap:wrap}}
+@media(max-width:560px){.photos,.sign{grid-template-columns:1fr}.slot+.slot,.sign>div+div{border-left:0;border-top:1px solid var(--bd)}.msb{margin-left:0}}
 @media print{
  .msb select{-webkit-appearance:none;appearance:none;padding:6px 8px}
  @page{size:A4;margin:8mm}
@@ -75,10 +76,9 @@ input[readonly]{background:#f0f0f0;color:#333}
   <div class="ref">
    <label for="no">No</label>
    <input type="text" id="no" class="opt" readonly placeholder="otomatis">
-   <div class="msb">MSB/FL/
-    <select id="dept"><option>LSS</option><option>ENG</option></select> /
-    <select id="disc"><option>Electrical</option><option>Mechanical</option><option>Instrument</option><option>Seaworld</option></select> /
-    <input type="text" placeholder="Year"> / <input type="text" placeholder="Month"> / <input type="text" placeholder="Date">
+   <div class="msb">
+    <span class="g">MSB/FL/ <select id="dept"><option>LSS</option><option>ENG</option></select> / <select id="disc"><option>Electrical</option><option>Mechanical</option><option>Instrument</option><option>Seaworld</option></select> /</span>
+    <span class="g"><input type="text" placeholder="Year"> / <input type="text" placeholder="Month"> / <input type="text" placeholder="Date"></span>
    </div>
   </div>
  </div>
@@ -93,7 +93,7 @@ input[readonly]{background:#f0f0f0;color:#333}
    <div><label>Name</label><input type="text"></div>
    <div><label>Designation</label><input type="text"></div>
    <div><label>Date</label><input type="date"></div>
-   <div><label>Time</label><input type="time"></div>
+   <div><label>Time</label><input type="time" id="rtime" readonly></div>
   </div>
  </div>
  <div class="sec"><b>Root Cause / Identification:</b><textarea></textarea></div>
@@ -129,6 +129,7 @@ const AREA=["Plaza","Sealion","Rocky Shores Toilet","Penguin","Tunnel","Dolphin 
 const EQUIP=["Light","Light Switch","Power Outlet","AC","Fan","Exhaust Fan","Freezer","Chiller","Door Panel","Door Lock/Key","Door Hinges","Door Handle","Door Closer","Water Tap","Jet Shower","Shower Hose","Hand Dryer","Soap Dispenser","Floor Drain","Closet","Urinal","Concrete Floor","Wooden Floor","Wall","Hand Rail","Roof","Ceiling/Plafond","Fresh Water Pipe","Water Tank","Circulation Pump","Vacuum Pump","Air Pump","Drain Pump","Sea Water Pipe","Ozone Line","Sand Filter","Drum Filter","Compressor","Ozone Generator","UV Light","ORP Display","Chiller Display"];
 const $=id=>document.getElementById(id);
 const pad=n=>String(n).padStart(3,'0');
+const nowTime=()=>{const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
 const fill=(id,list)=>document.getElementById(id).innerHTML=list.map(t=>`<label><input type="checkbox"> ${t.replace(/&/g,'&amp;')}</label>`).join("");
 fill("area",AREA);fill("equip",EQUIP);
 
@@ -200,6 +201,7 @@ function savePdf(){
  const reset=()=>btns.forEach((b,i)=>{b.disabled=false;b.textContent=old[i]});
  let n=0;
  const doPrint=()=>{reset();const t=document.title;document.title=base(n);window.print();document.title=t};
+ $('rtime').value=nowTime();
  btns.forEach(b=>{b.disabled=true;b.textContent='Mengupload foto...'});
  api({action:'reserve'})
   .then(j=>{n=j.number;$('no').value=pad(n);return uploadPhotos(n)})
@@ -209,7 +211,8 @@ function savePdf(){
    else alert('Gagal mengambil nomor ('+e.message+'). Coba lagi.');});
 }
 
-// nomor berikutnya (preview) dari server
+// waktu otomatis + nomor berikutnya (preview) dari server
+$('rtime').value=nowTime();
 fetch(UPLOAD_URL+'?token='+encodeURIComponent(TOKEN)).then(r=>r.json()).then(j=>{if(j.ok)$('no').value=pad(j.next)}).catch(()=>{});
 </script>
 </body>
