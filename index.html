@@ -24,6 +24,8 @@ textarea{min-height:80px;resize:vertical}
 .ref .full{grid-column:1/-1}
 .msb{display:flex;gap:4px;align-items:center}
 .msb input{width:60px;text-align:center}
+.msb #deptbox{width:60px}
+.msb #discbox{width:105px}
 .photos{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--bd)}
 .slot{padding:8px 10px}
 .slot+.slot{border-left:1px solid var(--bd)}
@@ -69,12 +71,12 @@ input[readonly]{background:#f0f0f0;color:#333}
  <div class="sub">Marine Safari Bali</div>
 
  <div class="sec"><b>Report Reference Information:</b>
-  <div class="ref">
-   <div><label>Department</label><select id="dept"><option>LSS</option><option>ENG</option></select></div>
-   <div><label>No</label><input type="text" id="no" class="opt" readonly placeholder="otomatis"></div>
-   <div class="full msb">MSB/FL/ <input type="text" id="deptbox" readonly> / <input type="text" id="yy" readonly> / <input type="text" id="mm" readonly> / <input type="text" id="dd" readonly></div>
-  </div>
- </div>
+ <div class="ref">
+ <div><label>Department</label><select id="dept"><option>LSS</option><option>ENG</option></select></div>
+ <div><label>Discipline</label><select id="disc"><option>Electrical</option><option>Mechanical</option><option>Instrument</option><option>Seaworld</option></select></div>
+ <div><label>No</label><input type="text" id="no" class="opt" readonly placeholder="otomatis"></div>
+ <div class="full msb">MSB/FL/ <input type="text" id="deptbox" readonly> / <input type="text" id="discbox" readonly> / <input type="text" placeholder="Year"> / <input type="text" placeholder="Month"> / <input type="text" placeholder="Date"></div>
+</div>
 
  <div class="sec"><b>Area:</b><div class="grid" id="area"></div></div>
  <div class="sec"><b>Equipment/Utility Type:</b><div class="grid" id="equip"></div>
@@ -204,21 +206,19 @@ async function uploadPhotos(disc,n){
  }
 }
 
-// kotak departemen di MSB/FL/ ikut pilihan LSS / ENG
-const syncDept=()=>{$('deptbox').value=$('dept').value};
-$('dept').addEventListener('change',syncDept);
-syncDept();
+// kotak departemen & discipline di MSB/FL/ ikut pilihan dropdown
+const syncRef=()=>{$('deptbox').value=$('dept').value;$('discbox').value=$('disc').value};
+$('dept').addEventListener('change',syncRef);
+$('disc').addEventListener('change',syncRef);
+syncRef();
 
+// hanya jam (Time) yang otomatis, ganti tiap menit
 function tickTime(){
- const d=new Date();
  $('rtime').value=nowTime();
- $('yy').value=d.getFullYear();
- $('mm').value=String(d.getMonth()+1).padStart(2,'0');
- $('dd').value=String(d.getDate()).padStart(2,'0');
  setTimeout(tickTime,60000-(Date.now()%60000)+50);
 }
 tickTime();
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)tickTime()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)$('rtime').value=nowTime()});
 
 // nomor berikutnya (preview) dari server
 fetch(UPLOAD_URL+'?token='+encodeURIComponent(TOKEN)).then(r=>r.json()).then(j=>{if(j.ok)$('no').value=pad(j.next)}).catch(()=>{});
