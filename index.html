@@ -42,6 +42,7 @@ button.clr{background:#999}
 .foot{text-align:right;font-size:10px;color:var(--mut);padding:6px 10px}
 .bar{max-width:820px;margin:10px auto;display:flex;gap:8px;padding:0 8px}
 .bar button{flex:1;padding:12px}
+.err{outline:2px solid #d32f2f;background:#fff0f0!important}
 @media(max-width:560px){.photos,.sign{grid-template-columns:1fr}.slot+.slot,.sign>div+div{border-left:0;border-top:1px solid var(--bd)}}
 @media print{
  @page{size:A4;margin:8mm}
@@ -60,7 +61,7 @@ button.clr{background:#999}
 </style>
 </head>
 <body>
-<div class="bar"><button onclick="window.print()">Simpan / Cetak PDF</button><button class="clr" onclick="if(confirm('Kosongkan semua isian?'))location.reload()">Reset</button></div>
+<div class="bar"><button onclick="savePdf()">Simpan / Cetak PDF</button><button class="clr" onclick="if(confirm('Kosongkan semua isian?'))location.reload()">Reset</button></div>
 <div class="page">
  <h1>SERVICE REQUEST FORM – FAULT LIST</h1>
  <div class="sub">Marine Safari Bali</div>
@@ -75,7 +76,7 @@ button.clr{background:#999}
 
  <div class="sec"><b>Area:</b><div class="grid" id="area"></div></div>
  <div class="sec"><b>Equipment/Utility Type:</b><div class="grid" id="equip"></div>
-  <div style="margin-top:8px"><b style="display:inline">Other:</b><input type="text"></div>
+  <div style="margin-top:8px"><b style="display:inline">Other:</b><input type="text" class="opt"></div>
  </div>
  <div class="sec"><b>Faulty Issue:</b><textarea></textarea></div>
  <div class="sec"><b>Reported by:</b>
@@ -91,11 +92,11 @@ button.clr{background:#999}
  <div class="photos">
   <div class="slot" id="before"><b>Photo Before Rectification</b>
    <div class="box"><span>Belum ada foto</span></div>
-   <div class="btns"><button data-k="cam"> Ambil Foto</button><button class="alt" data-k="gal"> Galeri</button><button class="clr" data-k="clr">Hapus</button></div>
+   <div class="btns"><button data-k="cam">Ambil Foto</button><button class="alt" data-k="gal">Galeri</button><button class="clr" data-k="clr">Hapus</button></div>
   </div>
   <div class="slot" id="after"><b>Photo After Rectification</b>
    <div class="box"><span>Belum ada foto</span></div>
-   <div class="btns"><button data-k="cam"> Ambil Foto</button><button class="alt" data-k="gal"> Galeri</button><button class="clr" data-k="clr">Hapus</button></div>
+   <div class="btns"><button data-k="cam">Ambil Foto</button><button class="alt" data-k="gal">Galeri</button><button class="clr" data-k="clr">Hapus</button></div>
   </div>
  </div>
 
@@ -138,7 +139,7 @@ document.querySelectorAll(".slot").forEach(slot=>{
   if(cam)i.capture="environment";
   i.onchange=async()=>{
    if(!i.files[0])return;
-   box.innerHTML="";
+   box.innerHTML="";box.classList.remove('err');
    const im=new Image();im.src=await shrink(i.files[0]);box.appendChild(im);
    i.value="";
   };
@@ -149,6 +150,26 @@ document.querySelectorAll(".slot").forEach(slot=>{
  slot.querySelector('[data-k=gal]').onclick=()=>gal.click();
  slot.querySelector('[data-k=clr]').onclick=()=>box.innerHTML="<span>Belum ada foto</span>";
 });
+
+// wajib lengkap sebelum bisa simpan/cetak PDF (kolom "Other" boleh kosong)
+document.addEventListener('input',e=>e.target.classList.remove('err'));
+document.addEventListener('change',e=>{const g=e.target.closest('.grid');if(g)g.classList.remove('err')});
+function savePdf(){
+ document.querySelectorAll('.err').forEach(e=>e.classList.remove('err'));
+ const bad=[];
+ document.querySelectorAll('.page input[type=text],.page input[type=date],.page input[type=time],.page textarea').forEach(el=>{
+  if(!el.classList.contains('opt')&&!el.value.trim()){el.classList.add('err');bad.push(el)}
+ });
+ ['area','equip'].forEach(id=>{const g=document.getElementById(id);if(!g.querySelector('input:checked')){g.classList.add('err');bad.push(g)}});
+ ['before','after'].forEach(id=>{const b=document.querySelector('#'+id+' .box');if(!b.querySelector('img')){b.classList.add('err');bad.push(b)}});
+ if(bad.length){
+  bad.sort((a,b)=>a.compareDocumentPosition(b)&4?-1:1);
+  alert('Belum lengkap: '+bad.length+' bagian masih kosong (ditandai merah).');
+  bad[0].scrollIntoView({block:'center',behavior:'smooth'});
+  return;
+ }
+ window.print();
+}
 </script>
 </body>
 </html>
