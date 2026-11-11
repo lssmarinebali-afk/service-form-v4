@@ -305,6 +305,29 @@ function restoreState(s){
  });
 }
   
+const AREA_CODE={"Plaza":"PLZ","Sealion":"SLN","Rocky Shores Toilet":"RST","Penguin":"PNG","Tunnel":"TNL","Dolphin Show":"DSH","Encounter Facility":"ENC","Education Center":"EDU","Prep. Kitchen":"PKT","Lab & Hospital":"LAB","Marine BOH":"MBH","Ara Cafe":"ARA","Pachamaya":"PCM","Jungle Odyssey":"JOD","Varuna":"VRN","Estuary":"EST","River Cafe":"RVC","Plaza Toilet":"PLT","Theater Tank":"THT","Employee Facility":"EMP","PR1":"PR1","PR2":"PR2","PR3":"PR3","PR4":"PR4","SWS":"SWS"};
+
+const EQUIP_CODE={"Light":"LGT","Light Switch":"LSW","Power Outlet":"POT","AC":"AC","Fan":"FAN","Exhaust Fan":"EXF","Freezer":"FRZ","Chiller":"CHL","Door Panel":"DPN","Door Lock/Key":"DLK","Door Hinges":"DHG","Door Handle":"DHD","Door Closer":"DCL","Water Tap":"WTP","Jet Shower":"JSH","Shower Hose":"SHH","Hand Dryer":"HDR","Soap Dispenser":"SOP","Floor Drain":"FDR","Closet":"CLS","Urinal":"URN","Concrete Floor":"CFL","Wooden Floor":"WFL","Wall":"WAL","Hand Rail":"HRL","Roof":"ROF","Ceiling/Plafond":"CLG","Fresh Water Pipe":"FWP","Water Tank":"WTK","Circulation Pump":"CPM","Vacuum Pump":"VPM","Air Pump":"APM","Drain Pump":"DPM","Sea Water Pipe":"SWP","Ozone Line":"OZL","Sand Filter":"SFL","Drum Filter":"DFL","Compressor":"CMP","Ozone Generator":"OZG","UV Light":"UVL","ORP Display":"ORP","Chiller Display":"CHD"};
+function checkedCodes(id,list,map){
+ return [...document.querySelectorAll('#'+id+' input')]
+  .map((c,i)=>c.checked?(map[list[i]]||list[i].replace(/[^A-Za-z0-9]/g,'').slice(0,3).toUpperCase()):null)
+  .filter(Boolean).join('+');
+}
+
+function finalName(){
+ return ['MSB','FL',$('dept').value,
+  checkedCodes('area',AREA,AREA_CODE),
+  checkedCodes('equip',EQUIP,EQUIP_CODE),
+  $('disc').value,$('yy').value,$('mm').value,
+  $('dd').value.trim().padStart(2,'0'),pad(N)].join('-');
+}
+
+// tanggal selalu 2 digit (1 -> 01), harinya tetap bebas
+$('dd').addEventListener('blur',()=>{
+ const v=$('dd').value.replace(/\D/g,'');
+ if(v)$('dd').value=v.slice(-2).padStart(2,'0');
+});
+  
 async function saveReport(){
  if(!lengkap('p1')) return;
  busy('.sv',true,'Saving...');
@@ -357,7 +380,7 @@ async function saveSign(){
    noRef:last.ref,
    rectifiedBy:rect,
    checkedBy:chk,
-   name:base()+'_FINAL.pdf',
+   name:finalName()+'_FINAL.pdf',
    data:pdf.output('datauristring').split(',')[1]
   },last.meta));
   alert('Tersimpan. Final PDF sudah masuk ke sheet.');
