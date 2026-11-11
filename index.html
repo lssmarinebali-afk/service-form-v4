@@ -113,8 +113,9 @@ input[readonly]{background:#f0f0f0;color:#333}
 
 <div class="sec">
   <b>Rectification Done:</b>
-  <textarea id="recDone"></textarea>
+  <textarea id="recDone" class="opt"></textarea>
 </div>
+</div>   <!-- tutup #p1, wajib ada -->
 
 <div class="bar">
   <button class="sv" onclick="saveReport()">Save Report</button>
@@ -251,7 +252,8 @@ async function downloadPdf(){
 function lengkap(id){
  document.querySelectorAll('.err').forEach(e=>e.classList.remove('err'));
  const bad=[];
- $(id).querySelectorAll('input[type=text],input[type=date],input[type=time],textarea').forEach(el=>{
+  $(id).querySelectorAll('input[type=text],input[type=date],input[type=time],textarea').forEach(el=>{
+  if(id==='p1'&&el.closest('#p2'))return;   // lewati kolom halaman 2
   if(!el.classList.contains('opt')&&!el.value.trim()){el.classList.add('err');bad.push(el)}
  });
  if(id==='p1'){
