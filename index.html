@@ -115,12 +115,6 @@ input[readonly]{background:#f0f0f0;color:#333}
   <b>Rectification Done:</b>
   <textarea id="recDone"></textarea>
 </div>
-  
-<div class="sec">
-  <b>Rectification Done:</b>
-  <textarea id="recDone"></textarea>
-</div>
-</div>   <!-- tutup #p1 -->
 
 <div class="bar">
   <button class="sv" onclick="saveReport()">Save Report</button>
@@ -284,6 +278,31 @@ function busy(sel,on,txt){
 let N=0;      // nomor yang sudah diambil; dipakai ulang kalau simpan gagal di tengah jalan
 let last=null; // data halaman 1 yang sudah di-Download, dipakai oleh tombol Save
 
+const FIELDS='#p1 input[type=text]:not(#no),#p1 input[type=date],#p1 input[type=time],#p1 textarea';
+const imgSrc=k=>{const i=document.querySelector('#'+k+' .box img');return i?i.src:''};
+
+function collectState(){
+ return JSON.stringify({
+  sel:['dept','disc','yy','mm'].map(k=>$(k).value),
+  f:[...document.querySelectorAll(FIELDS)].map(e=>e.value),
+  area:[...document.querySelectorAll('#area input')].map(c=>c.checked),
+  equip:[...document.querySelectorAll('#equip input')].map(c=>c.checked),
+  before:imgSrc('before'), after:imgSrc('after')
+ });
+}
+
+function restoreState(s){
+ ['dept','disc','yy','mm'].forEach((k,i)=>$(k).value=s.sel[i]);
+ document.querySelectorAll(FIELDS).forEach((e,i)=>e.value=s.f[i]||'');
+ ['area','equip'].forEach(k=>document.querySelectorAll('#'+k+' input').forEach((c,i)=>c.checked=!!s[k][i]));
+ ['before','after'].forEach(k=>{
+  if(!s[k])return;
+  const b=document.querySelector('#'+k+' .box');
+  b.innerHTML='';
+  const im=new Image();im.src=s[k];b.appendChild(im);
+ });
+}
+  
 async function saveReport(){
  if(!lengkap('p1')) return;
  busy('.sv',true,'Saving...');
@@ -305,7 +324,8 @@ async function saveReport(){
    status:'OPEN',
    recDone:$('recDone').value.trim(),
    name:base()+'.pdf',
-   data:pdf.output('datauristring').split(',')[1]
+   data:pdf.output('datauristring').split(',')[1],
+   state:collectState()          // <- tambahan
   },meta));
 
   last={ref:result.noRef||noRef, reportLink:result.reportLink, meta:meta};
@@ -359,6 +379,25 @@ function loadNext(){
 }
 ['dept','disc'].forEach(k=>$(k).addEventListener('change',()=>{N=0;loadNext()}));
 loadNext();
+
+(async()=>{
+ const ref=new URLSearchParams(location.search).get('ref');
+ if(!ref)return;
+ try{
+  const r=await fetch(UPLOAD_URL+'?action=getReport&token='+encodeURIComponent(TOKEN)+'&ref='+encodeURIComponent(ref));
+  const j=await r.json();
+  if(!j.ok)throw new Error(j.error);
+  const s=JSON.parse(j.report.state);
+  restoreState(s);
+  N=parseInt(ref.split('/').pop(),10);
+  $('no').value=pad(N);
+  last={ref:ref,reportLink:location.href,meta:{dept:s.sel[0],disc:s.sel[1],year:s.sel[2],month:s.sel[3]}};
+  $('ref2').textContent=ref;
+  document.querySelectorAll('#p1 input,#p1 textarea,#p1 select,#p1 button,.sv').forEach(e=>e.disabled=true);
+ }catch(e){
+  alert('Gagal membuka laporan: '+e.message);
+ }
+})();
 
 </script>
 </body>
