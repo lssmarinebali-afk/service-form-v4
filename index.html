@@ -315,11 +315,11 @@ function checkedCodes(id,list,map){
 }
 
 function finalName(){
- return ['MSB','FL',$('dept').value,
+ const p=last.ref.split('/');   // MSB/FL/dept/disc/yy/mm/dd/no
+ return ['MSB','FL',p[2],
   checkedCodes('area',AREA,AREA_CODE),
   checkedCodes('equip',EQUIP,EQUIP_CODE),
-  $('disc').value,$('yy').value,$('mm').value,
-  $('dd').value.trim().padStart(2,'0'),pad(N)].join('-');
+  p[3],p[4],p[5],p[6],p[7]].join('-');
 }
 
 // tanggal selalu 2 digit (1 -> 01), harinya tetap bebas
@@ -368,6 +368,7 @@ async function saveReport(){
 
 async function saveSign(){
  if(!last){alert('Tekan Save Report dulu sebelum mengisi Rectified by / Checked by.');return}
+ if(last.ref.split('/').length<8){alert('Reference tidak valid: '+last.ref);return}
  if(!lengkap('p2')) return;
  busy('.sg',true,'Menyimpan...');
  try{
@@ -407,11 +408,17 @@ function loadNext(){
 ['dept','disc'].forEach(k=>$(k).addEventListener('change',()=>{N=0;loadNext()}));
 loadNext();
 
-// isi otomatis bulan & tahun hari ini (hanya kalau form dibuka biasa, bukan dari link)
-if(!new URLSearchParams(location.search).get('ref')){
+function syncRefDate(){
  const t=new Date();
- $('yy').value=String(t.getFullYear());
+ const y=String(t.getFullYear());
+ if(![...$('yy').options].some(o=>o.value===y)) throw new Error('Tahun '+y+' belum ada di dropdown');
+ $('yy').value=y;
  $('mm').value=String(t.getMonth()+1).padStart(2,'0');
+ $('dd').value=String(t.getDate()).padStart(2,'0');
+}
+if(!new URLSearchParams(location.search).get('ref')){
+ syncRefDate();
+ $('dd').readOnly=true;
 }
 
 (async()=>{
