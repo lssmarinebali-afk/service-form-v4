@@ -270,7 +270,6 @@ function savePdf(){
 // SAVE: halaman 2 (Rectified by / Checked by) -> Drive + unduh PDF
 function saveSign(){
  if(!last){alert('Tekan Download (halaman 1) dulu sebelum menyimpan Rectified by / Checked by.');return}
- if(!lengkap('p2'))return;
  busy('.sg',true,'Menyimpan...');
  (async()=>{
   try{
