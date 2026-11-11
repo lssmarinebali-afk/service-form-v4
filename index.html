@@ -129,7 +129,7 @@ const TOKEN='msb-a97dcf76b4dafe3d';
 const AREA=["Plaza","Sealion","Rocky Shores Toilet","Penguin","Tunnel","Dolphin Show","Encounter Facility","Education Center","Prep. Kitchen","Lab & Hospital","Marine BOH","Ara Cafe","Pachamaya","Jungle Odyssey","Varuna","Estuary","River Cafe","Plaza Toilet","Theater Tank","Employee Facility","PR1","PR2","PR3","PR4","SWS"];
 const EQUIP=["Light","Light Switch","Power Outlet","AC","Fan","Exhaust Fan","Freezer","Chiller","Door Panel","Door Lock/Key","Door Hinges","Door Handle","Door Closer","Water Tap","Jet Shower","Shower Hose","Hand Dryer","Soap Dispenser","Floor Drain","Closet","Urinal","Concrete Floor","Wooden Floor","Wall","Hand Rail","Roof","Ceiling/Plafond","Fresh Water Pipe","Water Tank","Circulation Pump","Vacuum Pump","Air Pump","Drain Pump","Sea Water Pipe","Ozone Line","Sand Filter","Drum Filter","Compressor","Ozone Generator","UV Light","ORP Display","Chiller Display"];
 const $=id=>document.getElementById(id);
-const pad=n=>String(n).padStart(4,'0');
+const pad=n=>String(n).padStart(3,'0');
 const fill=(id,list)=>$(id).innerHTML=list.map(t=>`<label><input type="checkbox"> ${t.replace(/&/g,'&amp;')}</label>`).join("");
 fill("area",AREA);fill("equip",EQUIP);
 {const t=new Date(),y=String(t.getFullYear());if([...$('yy').options].some(o=>o.value===y))$('yy').value=y;$('mm').value=String(t.getMonth()+1).padStart(2,'0')}
@@ -222,7 +222,7 @@ function savePdf(){
  btns.forEach(b=>{b.disabled=true;b.textContent='Menyimpan...'});
  (async()=>{
   try{
-   if(!N){const j=await api({action:'reserve'});N=j.number}
+   if(!N){const j=await api({action:'reserve',dept:$('dept').value,disc:$('disc').value});N=j.number}
    $('no').value=pad(N);
    await uploadPhotos();
    const pdf=await makePdf();
@@ -240,11 +240,17 @@ function savePdf(){
 }
 
 // nomor berikutnya (preview), mencoba ulang tiap 5 detik kalau gagal
+// nomor berikutnya sesuai Dept + Discipline yang dipilih (preview)
+let nextReq=0;
 function loadNext(){
- fetch(UPLOAD_URL+'?token='+encodeURIComponent(TOKEN)).then(r=>r.json())
-  .then(j=>{if(j.ok){if(!N)$('no').value=pad(j.next)}else throw new Error(j.error)})
-  .catch(e=>{console.error(e);setTimeout(loadNext,5000)});
+ const id=++nextReq;
+ $('no').value='';
+ fetch(UPLOAD_URL+'?token='+encodeURIComponent(TOKEN)+'&dept='+encodeURIComponent($('dept').value)+'&disc='+encodeURIComponent($('disc').value))
+  .then(r=>r.json())
+  .then(j=>{if(id!==nextReq)return;if(j.ok){if(!N)$('no').value=pad(j.next)}else throw new Error(j.error)})
+  .catch(e=>{console.error(e);if(id===nextReq)setTimeout(loadNext,5000)});
 }
+['dept','disc'].forEach(k=>$(k).addEventListener('change',()=>{N=0;loadNext()}));
 loadNext();
 </script>
 </body>
