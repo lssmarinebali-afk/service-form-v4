@@ -116,7 +116,16 @@ input[readonly]{background:#f0f0f0;color:#333}
   <textarea id="recDone"></textarea>
 </div>
   
-<div class="bar"><button class="sv" onclick="saveReport()"> Save Report</button><button class="clr" onclick="if(confirm('Kosongkan semua isian?'))location.reload()">Reset</button></div>
+<div class="sec">
+  <b>Rectification Done:</b>
+  <textarea id="recDone"></textarea>
+</div>
+</div>   <!-- tutup #p1 -->
+
+<div class="bar">
+  <button class="sv" onclick="saveReport()">Save Report</button>
+  <button class="dl alt" onclick="downloadPdf()">Download</button>
+</div>
 
 <div class="page" id="p2">
  <div class="sec">Reference: <span id="ref2" style="font-weight:700">-</span></div>
@@ -211,6 +220,39 @@ async function makePdf(id){
  }finally{page.classList.remove('cap')}
 }
 
+  async function snap(id){
+ const page=$(id);
+ page.classList.add('cap');
+ try{ return await html2canvas(page,{scale:2,backgroundColor:'#ffffff',useCORS:true}); }
+ finally{ page.classList.remove('cap'); }
+}
+
+async function buildFull(){
+ const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4'});
+ const W=210,H=297,m=8,maxW=W-2*m,maxH=H-2*m;
+ for(const [i,id] of ['p1','p2'].entries()){
+  const c=await snap(id);
+  let w=maxW,h=c.height*w/c.width;
+  if(h>maxH){h=maxH;w=c.width*h/c.height}
+  if(i>0)pdf.addPage();
+  pdf.addImage(c.toDataURL('image/jpeg',.9),'JPEG',(W-w)/2,m,w,h);
+ }
+ return pdf;
+}
+
+async function downloadPdf(){
+ busy('.dl',true,'Membuat PDF...');
+ try{
+  const pdf=await buildFull();
+  pdf.save(base()+'.pdf');
+ }catch(e){
+  console.error(e);
+  alert('Gagal membuat PDF: '+e.message);
+ }finally{
+  busy('.dl',false);
+ }
+}
+
 // cek isian satu halaman (p1 atau p2); true kalau sudah lengkap
 function lengkap(id){
  document.querySelectorAll('.err').forEach(e=>e.classList.remove('err'));
@@ -243,114 +285,68 @@ let N=0;      // nomor yang sudah diambil; dipakai ulang kalau simpan gagal di t
 let last=null; // data halaman 1 yang sudah di-Download, dipakai oleh tombol Save
 
 async function saveReport(){
-
-  if(!lengkap('p1')) return;
-
-  busy('.sv', true, 'Saving...');
-
-  try {
-
-    if(!N){
-
-      const j = await api({
-        action: 'reserve',
-        dept: $('dept').value,
-        disc: $('disc').value
-      });
-
-      if(!j.ok) throw new Error(j.error);
-
-      N = j.number;
-    }
-
-    $('no').value = pad(N);
-
-    const noRef =
-      'MSB/FL/' +
-      refCode().replace(/-/g,'/');
-
-    const recDone = $('recDone').value.trim();
-
-    const result = await api({
-
-      action: 'createReport',
-
-      noRef: noRef,
-
-      status: 'OPEN',
-
-      recDone: recDone
-
-    });
-
-
-    if(!result.ok){
-
-      throw new Error(result.error);
-    }
-
-    last = {
-
-      ref: result.noRef,
-
-      reportLink: result.reportLink
-
-    };
-
-    $('ref2').textContent = result.noRef;
-
-    busy('.sv', false);
-
-
-    alert(
-      'REPORT SAVED!\\n\\n' +
-
-      'Reference:\\n' +
-      result.noRef +
-
-      '\\n\\nReport berhasil masuk ke database.'
-    );
-
-
-    console.log(
-      'Report Link:',
-      result.reportLink
-    );
-
-
-  } catch(e){
-
-    console.error(e);
-
-    busy('.sv', false);
-
-    alert(
-      'Gagal menyimpan: ' +
-      e.message
-    );
+ if(!lengkap('p1')) return;
+ busy('.sv',true,'Saving...');
+ try{
+  if(!N){
+   const j=await api({action:'reserve',dept:$('dept').value,disc:$('disc').value});
+   N=j.number;
   }
+  $('no').value=pad(N);
+
+  const noRef='MSB/FL/'+refCode().replace(/-/g,'/');
+  const pdf=await makePdf('p1');   // tampilan penuh halaman 1
+
+  const meta={dept:$('dept').value,disc:$('disc').value,year:$('yy').value,month:$('mm').value};
+
+  const result=await api(Object.assign({
+   action:'createReport',
+   noRef:noRef,
+   status:'OPEN',
+   recDone:$('recDone').value.trim(),
+   name:base()+'.pdf',
+   data:pdf.output('datauristring').split(',')[1]
+  },meta));
+
+  last={ref:result.noRef||noRef, reportLink:result.reportLink, meta:meta};
+  $('ref2').textContent=last.ref;
+  alert('REPORT SAVED!\n\nReference:\n'+last.ref);
+ }catch(e){
+  console.error(e);
+  alert('Gagal menyimpan: '+e.message);
+ }finally{
+  busy('.sv',false);
+ }
 }
 
-// SAVE: halaman 2 (Rectified by / Checked by) -> Drive + unduh PDF
-function saveSign(){
- if(!last){alert('Tekan Download (halaman 1) dulu sebelum menyimpan Rectified by / Checked by.');return}
+async function saveSign(){
+ if(!last){alert('Tekan Save Report dulu sebelum mengisi Rectified by / Checked by.');return}
+ if(!lengkap('p2')) return;
  busy('.sg',true,'Menyimpan...');
- (async()=>{
-  try{
-   $('ref2').textContent=last.ref;
-   const pdf=await makePdf('p2');
-   const name=last.base+'_sign.pdf';
-   await api(Object.assign({type:'pdf',name:name,data:pdf.output('datauristring').split(',')[1]},last.meta));
-   pdf.save(name);
-   busy('.sg',false);
-   alert('Tersimpan: '+name);
-  }catch(e){
-   busy('.sg',false);
-   alert('Gagal menyimpan ('+e.message+'). Tekan Save lagi untuk mencoba ulang.');
-  }
- })();
+ try{
+  $('ref2').textContent=last.ref;
+  const [rect,chk]=[...document.querySelectorAll('#p2 .sign > div')].map(d=>{
+   const v=[...d.querySelectorAll('input')].map(i=>i.value.trim());
+   return v[0]+' | '+v[2]+' | '+v[1]+' '+v[3];   // Name | Designation | Date Time
+  });
+  const pdf=await buildFull();
+  await api(Object.assign({
+   action:'updateSign',
+   noRef:last.ref,
+   rectifiedBy:rect,
+   checkedBy:chk,
+   name:base()+'_FINAL.pdf',
+   data:pdf.output('datauristring').split(',')[1]
+  },last.meta));
+  alert('Tersimpan. Final PDF sudah masuk ke sheet.');
+ }catch(e){
+  console.error(e);
+  alert('Gagal menyimpan ('+e.message+'). Tekan Save lagi untuk mencoba ulang.');
+ }finally{
+  busy('.sg',false);
+ }
 }
-
+  
 // nomor berikutnya sesuai Dept + Discipline yang dipilih (preview), mencoba ulang tiap 5 detik kalau gagal
 let nextReq=0;
 function loadNext(){
