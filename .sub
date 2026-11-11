@@ -11,8 +11,11 @@
 *{box-sizing:border-box}
 body{font:14px/1.35 system-ui,Arial,sans-serif;margin:0;background:#eef1f4;color:#111}
 .page{max-width:820px;margin:0 auto;background:#fff;border:1px solid var(--bd)}
-h1{font-size:18px;margin:0;padding:10px}
-.sub{padding:0 10px 8px;font-weight:700}
+.hd{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px}
+.hd .ttl{min-width:0}
+h1{font-size:18px;margin:0 0 4px}
+.sub{font-weight:700}
+.logo{flex:none;width:170px;height:auto;display:block}
 .sec{border-top:1px solid var(--bd);padding:8px 10px}
 .sec>b{display:block;margin-bottom:4px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 10px}
@@ -47,7 +50,7 @@ button.clr{background:#999}
 .bar .clr{flex:1 1 100%}
 input[readonly]{background:#f0f0f0;color:#333}
 .err{outline:2px solid #d32f2f;background:#fff0f0!important}
-@media(max-width:560px){.photos,.sign{grid-template-columns:1fr}.slot+.slot,.sign>div+div{border-left:0;border-top:1px solid var(--bd)}}
+@media(max-width:560px){.photos,.sign{grid-template-columns:1fr}.slot+.slot,.sign>div+div{border-left:0;border-top:1px solid var(--bd)}.logo{width:120px}}
 /* tampilan saat dibuat jadi PDF */
 .cap{width:820px!important;max-width:none!important}
 .cap .btns,.cap .box span{display:none}
@@ -57,13 +60,30 @@ input[readonly]{background:#f0f0f0;color:#333}
 .cap .photos,.cap .sign{grid-template-columns:1fr 1fr!important}
 .cap .slot+.slot,.cap .sign>div+div{border-left:1px solid #000!important;border-top:0!important}
 .cap select{-webkit-appearance:none;appearance:none}
+.cap .logo{width:190px}
 </style>
 </head>
 <body>
 <div class="bar"><button class="sv" onclick="savePdf()">Simpan</button><button class="clr" onclick="if(confirm('Kosongkan semua isian?'))location.reload()">Reset</button></div>
 <div class="page">
- <h1>SERVICE REQUEST FORM – FAULT LIST</h1>
- <div class="sub">Marine Safari Bali</div>
+ <div class="hd">
+  <div class="ttl">
+   <h1>SERVICE REQUEST FORM – FAULT LIST</h1>
+   <div class="sub">Marine Safari Bali</div>
+  </div>
+  <!-- Logo: The Exciting Marine Safari Bali (SVG inline, supaya ikut tercetak di PDF) -->
+  <svg class="logo" viewBox="0 0 340 175" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The Exciting Marine Safari Bali">
+   <text x="4" y="48" font-family="'Brush Script MT','Segoe Script','Comic Sans MS',cursive" font-style="italic" font-weight="700" font-size="34" fill="#2aa7e0" textLength="140" lengthAdjust="spacingAndGlyphs">The Exciting</text>
+   <text x="158" y="52" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="26" fill="#274e9e" textLength="175" lengthAdjust="spacing">MARINE</text>
+   <path d="M206 105 C 212 70, 226 44, 236 40 C 238 70, 252 92, 268 104 C 262 112, 232 114, 206 105 Z" fill="#2ef0ee"/>
+   <path d="M222 100 C 232 64, 250 22, 262 8 C 266 40, 276 76, 300 98 C 312 104, 322 108, 326 112 C 300 122, 256 122, 222 100 Z" fill="#9ffbff"/>
+   <path d="M64 128 L 205 99 L 207 104 L 70 132 Z" fill="#9ffbff"/>
+   <text x="0" y="136" font-family="'Arial Rounded MT Bold','Arial Black',Arial,sans-serif" font-weight="900" font-size="100" fill="#274e9e" textLength="334" lengthAdjust="spacingAndGlyphs" stroke="#274e9e" stroke-width="2" stroke-linejoin="round">SAFARI</text>
+   <path d="M64 128 L 150 111 L 152 115 L 70 132 Z" fill="#9ffbff"/>
+   <path d="M222 100 C 232 64, 250 22, 262 8 C 266 40, 276 76, 300 98 C 312 104, 322 108, 326 112 C 300 122, 256 122, 222 100 Z" fill="#9ffbff"/>
+   <text x="205" y="170" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="24" fill="#274e9e" textLength="130" lengthAdjust="spacing">BALI</text>
+  </svg>
+ </div>
 
  <div class="sec"><b>Report Reference Information:</b>
   <div class="msb">MSB/FL/
