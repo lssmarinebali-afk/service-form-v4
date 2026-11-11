@@ -324,8 +324,10 @@ function finalName(){
 
 // tanggal selalu 2 digit (1 -> 01), harinya tetap bebas
 $('dd').addEventListener('blur',()=>{
- const v=$('dd').value.replace(/\D/g,'');
- if(v)$('dd').value=v.slice(-2).padStart(2,'0');
+ let v=parseInt($('dd').value.replace(/\D/g,''),10);
+ if(isNaN(v)){$('dd').value='';return}
+ v=Math.min(31,Math.max(1,v));
+ $('dd').value=String(v).padStart(2,'0');
 });
   
 async function saveReport(){
@@ -404,6 +406,13 @@ function loadNext(){
 }
 ['dept','disc'].forEach(k=>$(k).addEventListener('change',()=>{N=0;loadNext()}));
 loadNext();
+
+// isi otomatis bulan & tahun hari ini (hanya kalau form dibuka biasa, bukan dari link)
+if(!new URLSearchParams(location.search).get('ref')){
+ const t=new Date();
+ $('yy').value=String(t.getFullYear());
+ $('mm').value=String(t.getMonth()+1).padStart(2,'0');
+}
 
 (async()=>{
  const ref=new URLSearchParams(location.search).get('ref');
