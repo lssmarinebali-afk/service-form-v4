@@ -111,10 +111,12 @@ input[readonly]{background:#f0f0f0;color:#333}
   </div>
  </div>
 
- <div class="sec"><b>Rectification Done:</b><textarea></textarea></div>
+<div class="sec">
+  <b>Rectification Done:</b>
+  <textarea id="recDone"></textarea>
 </div>
-
-<div class="bar"><button class="sv" onclick="savePdf()">Download</button><button class="clr" onclick="if(confirm('Kosongkan semua isian?'))location.reload()">Reset</button></div>
+  
+<div class="bar"><button class="sv" onclick="saveReport()"> Save Report</button><button class="clr" onclick="if(confirm('Kosongkan semua isian?'))location.reload()">Reset</button></div>
 
 <div class="page" id="p2">
  <div class="sec">Reference: <span id="ref2" style="font-weight:700">-</span></div>
@@ -240,31 +242,93 @@ function busy(sel,on,txt){
 let N=0;      // nomor yang sudah diambil; dipakai ulang kalau simpan gagal di tengah jalan
 let last=null; // data halaman 1 yang sudah di-Download, dipakai oleh tombol Save
 
-// DOWNLOAD: halaman 1 -> Drive + unduh PDF
-function savePdf(){
- if(last&&!confirm('Halaman 1 sudah di-download dengan nomor '+last.ref.split('/').pop()+'. Download lagi akan memakai nomor baru. Lanjut?'))return;
- if(!lengkap('p1'))return;
- busy('.sv',true,'Menyimpan...');
- (async()=>{
-  try{
-   if(!N){const j=await api({action:'reserve',dept:$('dept').value,disc:$('disc').value});N=j.number}
-   $('no').value=pad(N);
-   await uploadPhotos();
-   const pdf=await makePdf('p1');
-   const name=base()+'.pdf';
-   const meta={dept:$('dept').value,disc:$('disc').value,year:$('yy').value,month:$('mm').value};
-   await api(Object.assign({type:'pdf',name:name,data:pdf.output('datauristring').split(',')[1]},meta));
-   pdf.save(name);
-   last={base:base(),meta:meta,ref:'MSB/FL/'+refCode().replace(/-/g,'/')};
-   $('ref2').textContent=last.ref;
-   busy('.sv',false);
-   alert('Tersimpan: '+name+'\nLanjut isi Rectified by / Checked by, lalu tekan Save.');
-   N=0;
-  }catch(e){
-   busy('.sv',false);
-   alert('Gagal menyimpan ('+e.message+'). Tekan Download lagi untuk mencoba ulang.');
+async function saveReport(){
+
+  if(!lengkap('p1')) return;
+
+  busy('.sv', true, 'Saving...');
+
+  try {
+
+    if(!N){
+
+      const j = await api({
+        action: 'reserve',
+        dept: $('dept').value,
+        disc: $('disc').value
+      });
+
+      if(!j.ok) throw new Error(j.error);
+
+      N = j.number;
+    }
+
+    $('no').value = pad(N);
+
+    const noRef =
+      'MSB/FL/' +
+      refCode().replace(/-/g,'/');
+
+    const recDone = $('recDone').value.trim();
+
+    const result = await api({
+
+      action: 'createReport',
+
+      noRef: noRef,
+
+      status: 'OPEN',
+
+      recDone: recDone
+
+    });
+
+
+    if(!result.ok){
+
+      throw new Error(result.error);
+    }
+
+    last = {
+
+      ref: result.noRef,
+
+      reportLink: result.reportLink
+
+    };
+
+    $('ref2').textContent = result.noRef;
+
+    busy('.sv', false);
+
+
+    alert(
+      'REPORT SAVED!\\n\\n' +
+
+      'Reference:\\n' +
+      result.noRef +
+
+      '\\n\\nReport berhasil masuk ke database.'
+    );
+
+
+    console.log(
+      'Report Link:',
+      result.reportLink
+    );
+
+
+  } catch(e){
+
+    console.error(e);
+
+    busy('.sv', false);
+
+    alert(
+      'Gagal menyimpan: ' +
+      e.message
+    );
   }
- })();
 }
 
 // SAVE: halaman 2 (Rectified by / Checked by) -> Drive + unduh PDF
