@@ -49,8 +49,7 @@ button.clr{background:#999}
 .bar button{flex:1 1 30%;padding:12px}
 .bar .clr{flex:1 1 30%}
 body{padding:10px 0 20px}
-.page+.page{margin-top:14px}
-.page+.page .sign{border-top:0}
+#p2 .sec:first-child{border-top:0}
 input[readonly]{background:#f0f0f0;color:#333}
 .err{outline:2px solid #d32f2f;background:#fff0f0!important}
 @media(max-width:560px){.photos,.sign{grid-template-columns:1fr}.slot+.slot,.sign>div+div{border-left:0;border-top:1px solid var(--bd)}.logo{width:120px}}
@@ -67,8 +66,8 @@ input[readonly]{background:#f0f0f0;color:#333}
 </style>
 </head>
 <body>
-<div class="page">
- <div class="hd">
+<div class="page" id="p1"> 
+<div class="hd">
   <div class="ttl">
    <h1>SERVICE REQUEST FORM – FAULT LIST</h1>
    <div class="sub">Marine Safari Bali</div>
@@ -115,7 +114,10 @@ input[readonly]{background:#f0f0f0;color:#333}
  <div class="sec"><b>Rectification Done:</b><textarea></textarea></div>
 </div>
 
-<div class="page">
+<div class="bar"><button class="sv" onclick="savePdf()">Download</button><button class="clr" onclick="if(confirm('Kosongkan semua isian?'))location.reload()">Reset</button></div>
+
+<div class="page" id="p2">
+ <div class="sec">Reference: <span id="ref2" style="font-weight:700">-</span></div>
  <div class="sign">
   <div><h3>Rectified by:</h3><div class="row">
    <div><label>Name</label><input type="text"></div><div><label>Date</label><input type="date"></div>
@@ -127,121 +129,98 @@ input[readonly]{background:#f0f0f0;color:#333}
  <div class="foot">MSB/FL/ENG/101126/v4</div>
 </div>
 
-<div class="bar"><button class="sv" onclick="savePdf()">Download</button><button class="clr" onclick="if(confirm('Kosongkan semua isian?'))location.reload()">Reset</button></div>
+<div class="bar"><button class="sg alt" onclick="saveSign()">Save</button></div>
+ 
 <script>
-const UPLOAD_URL='https://script.google.com/macros/s/AKfycbxV2Bhdo_xlkJ2XzIEMGHBLxs1ypPQAEuK2NaqZdoo-fAJsIyns8bIwZGK9CoPpRAYj/exec';
-const TOKEN='msb-a97dcf76b4dafe3d';
-const AREA=["Plaza","Sealion","Rocky Shores Toilet","Penguin","Tunnel","Dolphin Show","Encounter Facility","Education Center","Prep. Kitchen","Lab & Hospital","Marine BOH","Ara Cafe","Pachamaya","Jungle Odyssey","Varuna","Estuary","River Cafe","Plaza Toilet","Theater Tank","Employee Facility","PR1","PR2","PR3","PR4","SWS"];
-const EQUIP=["Light","Light Switch","Power Outlet","AC","Fan","Exhaust Fan","Freezer","Chiller","Door Panel","Door Lock/Key","Door Hinges","Door Handle","Door Closer","Water Tap","Jet Shower","Shower Hose","Hand Dryer","Soap Dispenser","Floor Drain","Closet","Urinal","Concrete Floor","Wooden Floor","Wall","Hand Rail","Roof","Ceiling/Plafond","Fresh Water Pipe","Water Tank","Circulation Pump","Vacuum Pump","Air Pump","Drain Pump","Sea Water Pipe","Ozone Line","Sand Filter","Drum Filter","Compressor","Ozone Generator","UV Light","ORP Display","Chiller Display"];
-const $=id=>document.getElementById(id);
-const pad=n=>String(n).padStart(3,'0');
-const fill=(id,list)=>$(id).innerHTML=list.map(t=>`<label><input type="checkbox"> ${t.replace(/&/g,'&amp;')}</label>`).join("");
-fill("area",AREA);fill("equip",EQUIP);
-{const t=new Date(),y=String(t.getFullYear());if([...$('yy').options].some(o=>o.value===y))$('yy').value=y;$('mm').value=String(t.getMonth()+1).padStart(2,'0')}
-
-// foto: kamera / galeri, dikecilkan supaya file tidak berat
-function shrink(file,max=1280){
- return new Promise(res=>{
-  const img=new Image(),url=URL.createObjectURL(file);
-  img.onload=()=>{
-   const s=Math.min(1,max/Math.max(img.width,img.height));
-   const c=document.createElement("canvas");c.width=img.width*s;c.height=img.height*s;
-   c.getContext("2d").drawImage(img,0,0,c.width,c.height);
-   URL.revokeObjectURL(url);res(c.toDataURL("image/jpeg",.82));
-  };
-  img.src=url;
- });
-}
-document.querySelectorAll(".slot").forEach(slot=>{
- const box=slot.querySelector(".box");
- const mk=cam=>{
-  const i=document.createElement("input");i.type="file";i.accept="image/*";
-  if(cam)i.capture="environment";
-  i.onchange=async()=>{
-   if(!i.files[0])return;
-   box.innerHTML="";box.classList.remove('err');
-   const im=new Image();im.src=await shrink(i.files[0]);box.appendChild(im);
-   i.value="";
-  };
-  return i;
- };
- const cam=mk(true),gal=mk(false);
- slot.querySelector('[data-k=cam]').onclick=()=>cam.click();
- slot.querySelector('[data-k=gal]').onclick=()=>gal.click();
- slot.querySelector('[data-k=clr]').onclick=()=>box.innerHTML="<span>Belum ada foto</span>";
-});
-
-document.addEventListener('input',e=>e.target.classList.remove('err'));
-document.addEventListener('change',e=>{const g=e.target.closest('.grid');if(g)g.classList.remove('err')});
-
-// nama file: MSB-FL-LSS-Electrical-Year-Month-Date-No
-function refCode(){return [...document.querySelectorAll('.msb input,.msb select')].map(i=>i.value.trim().replace(/[^\w-]/g,'')).join('-')||'form'}
-const base=()=>'MSB-FL-'+refCode();
-
-async function api(body){
- const r=await fetch(UPLOAD_URL,{method:'POST',body:JSON.stringify(Object.assign({token:TOKEN},body))});
- const j=await r.json();
- if(!j.ok)throw new Error(j.error);
- return j;
-}
-async function uploadPhotos(){
- const ts=new Date().toISOString().slice(0,16).replace(/[:T]/g,'-');
- for(const t of ['before','after']){
-  const src=document.querySelector('#'+t+' .box img').src;
-  await api({type:t,name:base()+'_'+t+'_'+ts+'.jpg',data:src.split(',')[1]});
- }
-}
-
-async function makePdf(){
- const pages=[...document.querySelectorAll('.page')];
- pages.forEach(p=>p.classList.add('cap'));
+async function makePdf(id){
+ const page=$(id);
+ page.classList.add('cap');
  try{
+  const c=await html2canvas(page,{scale:2,backgroundColor:'#ffffff',useCORS:true});
   const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4'});
   const W=210,H=297,m=8,maxW=W-2*m,maxH=H-2*m;
-  for(let i=0;i<pages.length;i++){
-   const c=await html2canvas(pages[i],{scale:2,backgroundColor:'#ffffff',useCORS:true});
-   let w=maxW,h=c.height*w/c.width;
-   if(h>maxH){h=maxH;w=c.width*h/c.height}
-   if(i>0)pdf.addPage();
-   pdf.addImage(c.toDataURL('image/jpeg',.9),'JPEG',(W-w)/2,m,w,h);
-  }
+  let w=maxW,h=c.height*w/c.width;
+  if(h>maxH){h=maxH;w=c.width*h/c.height}
+  pdf.addImage(c.toDataURL('image/jpeg',.9),'JPEG',(W-w)/2,m,w,h);
   return pdf;
- }finally{pages.forEach(p=>p.classList.remove('cap'))}
+ }finally{page.classList.remove('cap')}
 }
 
-let N=0; // nomor yang sudah diambil; dipakai ulang kalau simpan gagal di tengah jalan
-function savePdf(){
+// cek isian satu halaman (p1 atau p2); true kalau sudah lengkap
+function lengkap(id){
  document.querySelectorAll('.err').forEach(e=>e.classList.remove('err'));
  const bad=[];
- document.querySelectorAll('.page input[type=text],.page input[type=date],.page input[type=time],.page textarea').forEach(el=>{
+ $(id).querySelectorAll('input[type=text],input[type=date],input[type=time],textarea').forEach(el=>{
   if(!el.classList.contains('opt')&&!el.value.trim()){el.classList.add('err');bad.push(el)}
  });
- ['area','equip'].forEach(id=>{const g=$(id);if(!g.querySelector('input:checked')){g.classList.add('err');bad.push(g)}});
- ['before','after'].forEach(id=>{const b=document.querySelector('#'+id+' .box');if(!b.querySelector('img')){b.classList.add('err');bad.push(b)}});
+ if(id==='p1'){
+  ['area','equip'].forEach(k=>{const g=$(k);if(!g.querySelector('input:checked')){g.classList.add('err');bad.push(g)}});
+  ['before','after'].forEach(k=>{const b=document.querySelector('#'+k+' .box');if(!b.querySelector('img')){b.classList.add('err');bad.push(b)}});
+ }
  if(bad.length){
   bad.sort((a,b)=>a.compareDocumentPosition(b)&4?-1:1);
   alert('Belum lengkap: '+bad.length+' bagian masih kosong (ditandai merah).');
   bad[0].scrollIntoView({block:'center',behavior:'smooth'});
-  return;
+  return false;
  }
- const btns=[...document.querySelectorAll('.bar .sv')],old=btns.map(b=>b.textContent);
- const reset=()=>btns.forEach((b,i)=>{b.disabled=false;b.textContent=old[i]});
- btns.forEach(b=>{b.disabled=true;b.textContent='Menyimpan...'});
+ return true;
+}
+
+// tombol sibuk / normal kembali
+function busy(sel,on,txt){
+ document.querySelectorAll(sel).forEach(b=>{
+  if(on){b.dataset.t=b.textContent;b.disabled=true;b.textContent=txt}
+  else{b.disabled=false;b.textContent=b.dataset.t||b.textContent}
+ });
+}
+
+let N=0;      // nomor yang sudah diambil; dipakai ulang kalau simpan gagal di tengah jalan
+let last=null; // data halaman 1 yang sudah di-Download, dipakai oleh tombol Save
+
+// DOWNLOAD: halaman 1 -> Drive + unduh PDF
+function savePdf(){
+ if(last&&!confirm('Halaman 1 sudah di-download dengan nomor '+last.ref.split('/').pop()+'. Download lagi akan memakai nomor baru. Lanjut?'))return;
+ if(!lengkap('p1'))return;
+ busy('.sv',true,'Menyimpan...');
  (async()=>{
   try{
    if(!N){const j=await api({action:'reserve',dept:$('dept').value,disc:$('disc').value});N=j.number}
    $('no').value=pad(N);
    await uploadPhotos();
-   const pdf=await makePdf();
+   const pdf=await makePdf('p1');
    const name=base()+'.pdf';
-   await api({type:'pdf',name:name,data:pdf.output('datauristring').split(',')[1],dept:$('dept').value,disc:$('disc').value,year:$('yy').value,month:$('mm').value});
+   const meta={dept:$('dept').value,disc:$('disc').value,year:$('yy').value,month:$('mm').value};
+   await api(Object.assign({type:'pdf',name:name,data:pdf.output('datauristring').split(',')[1]},meta));
    pdf.save(name);
-   reset();
-   alert('Tersimpan: '+name);
+   last={base:base(),meta:meta,ref:'MSB/FL/'+refCode().replace(/-/g,'/')};
+   $('ref2').textContent=last.ref;
+   busy('.sv',false);
+   alert('Tersimpan: '+name+'\nLanjut isi Rectified by / Checked by, lalu tekan Save.');
    N=0;
   }catch(e){
-   reset();
-   alert('Gagal menyimpan ('+e.message+'). Tekan Simpan lagi untuk mencoba ulang.');
+   busy('.sv',false);
+   alert('Gagal menyimpan ('+e.message+'). Tekan Download lagi untuk mencoba ulang.');
+  }
+ })();
+}
+
+// SAVE: halaman 2 (Rectified by / Checked by) -> Drive + unduh PDF
+function saveSign(){
+ if(!last){alert('Tekan Download (halaman 1) dulu sebelum menyimpan Rectified by / Checked by.');return}
+ if(!lengkap('p2'))return;
+ busy('.sg',true,'Menyimpan...');
+ (async()=>{
+  try{
+   $('ref2').textContent=last.ref;
+   const pdf=await makePdf('p2');
+   const name=last.base+'_sign.pdf';
+   await api(Object.assign({type:'pdf',name:name,data:pdf.output('datauristring').split(',')[1]},last.meta));
+   pdf.save(name);
+   busy('.sg',false);
+   alert('Tersimpan: '+name);
+  }catch(e){
+   busy('.sg',false);
+   alert('Gagal menyimpan ('+e.message+'). Tekan Save lagi untuk mencoba ulang.');
   }
  })();
 }
