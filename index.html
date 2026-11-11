@@ -78,8 +78,11 @@ input[readonly]{background:#f0f0f0;color:#333}
   <div class="msb">MSB/FL/
    <select id="dept"><option>LSS</option><option>ENG</option></select> /
    <select id="disc"><option>Electrical</option><option>Mechanical</option><option>Instrument</option><option>Seaworld</option></select> /
-   <input type="text" id="yy" placeholder="Year"> / <input type="text" id="mm" placeholder="Month"> / <input type="text" id="dd" placeholder="Date"> /
+   <select id="yy"><option>2026</option><option>2027</option><option>2028</option></select> /
+   <select id="mm"><option value="01">01 - Jan</option><option value="02">02 - Feb</option><option value="03">03 - Mar</option><option value="04">04 - Apr</option><option value="05">05 - Mei</option><option value="06">06 - Jun</option><option value="07">07 - Jul</option><option value="08">08 - Agu</option><option value="09">09 - Sep</option><option value="10">10 - Okt</option><option value="11">11 - Nov</option><option value="12">12 - Des</option></select> /
+   <input type="text" id="dd" placeholder="Date"> /
    <input type="text" id="no" class="opt" readonly placeholder="No">
+  </div>
   </div>
  </div>
 
@@ -131,6 +134,7 @@ const $=id=>document.getElementById(id);
 const pad=n=>String(n).padStart(4,'0');
 const fill=(id,list)=>$(id).innerHTML=list.map(t=>`<label><input type="checkbox"> ${t.replace(/&/g,'&amp;')}</label>`).join("");
 fill("area",AREA);fill("equip",EQUIP);
+{const t=new Date(),y=String(t.getFullYear());if([...$('yy').options].some(o=>o.value===y))$('yy').value=y;$('mm').value=String(t.getMonth()+1).padStart(2,'0')}
 
 // foto: kamera / galeri, dikecilkan supaya file tidak berat
 function shrink(file,max=1280){
