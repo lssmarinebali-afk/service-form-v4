@@ -415,7 +415,6 @@ async function saveSign(){
    data:pdf.output('datauristring').split(',')[1]
   },last.meta));
   alert('Tersimpan. Final PDF sudah masuk ke sheet.');
-  location.href=location.pathname+'?n='+Date.now();
  }catch(e){
   console.error(e);
   alert('Gagal menyimpan ('+e.message+'). Tekan Save lagi untuk mencoba ulang.');
