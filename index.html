@@ -390,9 +390,30 @@ async function saveAfter(){
   await uploadPhotos(['after']);
   await api(Object.assign({action:'updateAfter',noRef:last.ref,recDone:r.value.trim(),state:collectState()},last.meta));
   alert('AFTER SAVED!\n\nReference:\n'+last.ref);
-  location.href=location.pathname+'?n='+Date.now();
+  location.href=location.pathname+'?ref='+encodeURIComponent(last.ref);
  }catch(e){console.error(e);alert('Gagal menyimpan: '+e.message)}
  finally{busy('.sa',false)}
+}
+
+async function saveRect(){
+ if(!last){alert('Buka laporan lewat link Report Link di sheet dulu.');return}
+ const d=document.querySelector('#p2 .sign > div');
+ const v=[...d.querySelectorAll('input')].map(i=>i.value.trim());
+ if(v.some(x=>!x)){alert('Name, Date, Designation, dan Time (Rectified by) harus diisi.');return}
+ busy('.sr',true,'Menyimpan...');
+ try{
+  await api(Object.assign({
+   action:'updateRect',
+   noRef:last.ref,
+   rectifiedBy:v[0]+' | '+v[2]+' | '+v[1]+' '+v[3]
+  },last.meta));
+  alert('Rectified by tersimpan.');
+ }catch(e){
+  console.error(e);
+  alert('Gagal menyimpan ('+e.message+'). Tekan Save lagi untuk mencoba ulang.');
+ }finally{
+  busy('.sr',false);
+ }
 }
   
 async function saveSign(){
@@ -411,6 +432,7 @@ async function saveSign(){
    noRef:last.ref,
    rectifiedBy:rect,
    checkedBy:chk,
+   state:collectState(),
    name:finalName()+'_FINAL.pdf',
    data:pdf.output('datauristring').split(',')[1]
   },last.meta));
@@ -423,7 +445,6 @@ async function saveSign(){
  }
 }
   
-// nomor berikutnya sesuai Dept + Discipline yang dipilih (preview), mencoba ulang tiap 5 detik kalau gagal
 let nextReq=0;
 function loadNext(){
  const id=++nextReq;
