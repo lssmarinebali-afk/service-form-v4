@@ -157,6 +157,7 @@ input[type=time]::-webkit-date-and-time-value{
 
 <div class="bar">
  <button class="dl" onclick="downloadPdf()">Download PDF</button>
+ <button class="clr" id="rst" style="display:none" onclick="resetNo()">Reset No ke 001</button>
 </div>
 
 <script>
@@ -472,6 +473,23 @@ async function saveSign(){
   alert('Gagal menyimpan ('+e.message+'). Tekan Save lagi untuk mencoba ulang.');
  }finally{
   busy('.sg',false);
+ }
+}
+
+if(new URLSearchParams(location.search).get('admin')==='1')$('rst').style.display='';
+
+async function resetNo(){
+ const pin=prompt('Masukkan PIN untuk reset nomor:');
+ if(!pin)return;
+ if(!confirm('Semua nomor laporan akan kembali ke 001. Lanjut?'))return;
+ try{
+  await api({action:'resetCounter',pin:pin});
+  N=0;
+  loadNext();
+  alert('Nomor direset. Laporan berikutnya mulai dari 001.');
+ }catch(e){
+  console.error(e);
+  alert('Gagal reset: '+e.message);
  }
 }
   
