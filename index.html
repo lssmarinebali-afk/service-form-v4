@@ -370,6 +370,7 @@ async function saveReport(){
   last={ref:result.noRef||noRef, reportLink:result.reportLink, meta:meta};
   $('ref2').textContent=last.ref;
   alert('REPORT SAVED!\n\nReference:\n'+last.ref);
+  location.href=location.pathname+'?n='+Date.now();
  }catch(e){
   console.error(e);
   alert('Gagal menyimpan: '+e.message);
@@ -390,13 +391,13 @@ async function saveAfter(){
   await uploadPhotos(['after']);
   await api(Object.assign({action:'updateAfter',noRef:last.ref,recDone:r.value.trim(),state:collectState()},last.meta));
   alert('AFTER SAVED!\n\nReference:\n'+last.ref);
+  location.href=location.pathname+'?n='+Date.now();
  }catch(e){console.error(e);alert('Gagal menyimpan: '+e.message)}
  finally{busy('.sa',false)}
 }
   
 async function saveSign(){
- if(!last){alert('Tekan Save Report dulu sebelum mengisi Rectified by / Checked by.');return}
- if(last.ref.split('/').length<8){alert('Reference tidak valid: '+last.ref);return}
+ alert('Buka laporan lewat link Report Link di sheet dulu sebelum mengisi Rectified by / Checked by.') if(last.ref.split('/').length<8){alert('Reference tidak valid: '+last.ref);return}
  if(!lengkap('p2')) return;
  busy('.sg',true,'Menyimpan...');
  try{
@@ -415,6 +416,7 @@ async function saveSign(){
    data:pdf.output('datauristring').split(',')[1]
   },last.meta));
   alert('Tersimpan. Final PDF sudah masuk ke sheet.');
+  location.href=location.pathname+'?n='+Date.now();
  }catch(e){
   console.error(e);
   alert('Gagal menyimpan ('+e.message+'). Tekan Save lagi untuk mencoba ulang.');
