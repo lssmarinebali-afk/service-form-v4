@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Service Request Form – Fault List | Marine Safari Bali</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@1.5.8/dist/html2canvas-pro.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{--bd:#222;--mut:#666;--acc:#0a6ebd}
@@ -134,7 +134,13 @@ input[readonly]{background:#f0f0f0;color:#333}
    <div><label>Designation</label><input type="text"></div><div><label>Time</label><input type="time"></div></div>
    <div style="margin-top:8px" data-html2canvas-ignore><button class="sg alt" onclick="saveSign()">Save (Final PDF)</button></div>
   </div>
- 
+ </div>
+</div>
+
+<div class="bar">
+ <button class="dl" onclick="downloadPdf()">Download PDF</button>
+</div>
+
 <script>
 const UPLOAD_URL='https://script.google.com/macros/s/AKfycbxV2Bhdo_xlkJ2XzIEMGHBLxs1ypPQAEuK2NaqZdoo-fAJsIyns8bIwZGK9CoPpRAYj/exec';
 const TOKEN='msb-a97dcf76b4dafe3d';
@@ -238,7 +244,13 @@ async function downloadPdf(){
  busy('.dl',true,'Membuat PDF...');
  try{
   const pdf=await buildFull();
-  pdf.save(base()+'.pdf');
+  const name=base()+'.pdf';
+  const file=new File([pdf.output('blob')],name,{type:'application/pdf'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+   try{await navigator.share({files:[file],title:name});return}
+   catch(e){if(e&&e.name==='AbortError')return}
+  }
+  pdf.save(name);
  }catch(e){
   console.error(e);
   alert('Gagal membuat PDF: '+e.message);
