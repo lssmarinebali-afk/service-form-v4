@@ -397,8 +397,8 @@ async function saveAfter(){
 }
   
 async function saveSign(){
- alert('Buka laporan lewat link Report Link di sheet dulu sebelum mengisi Rectified by / Checked by.') if(last.ref.split('/').length<8){alert('Reference tidak valid: '+last.ref);return}
- if(!lengkap('p2')) return;
+ if(!last){alert('Buka laporan lewat link Report Link di sheet dulu sebelum mengisi Rectified by / Checked by.');return}
+ if(last.ref.split('/').length<8){alert('Reference tidak valid: '+last.ref);return}
  busy('.sg',true,'Menyimpan...');
  try{
   $('ref2').textContent=last.ref;
