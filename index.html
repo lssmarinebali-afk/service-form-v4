@@ -193,11 +193,11 @@ async function api(body){
  return j;
 }
 async function uploadPhotos(){
- const ts=new Date().toISOString().slice(0,16).replace(/[:T]/g,'-');
+ const d=new Date(), ts=String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0');
  const meta={dept:$('dept').value,disc:$('disc').value,year:$('yy').value,month:$('mm').value};
  for(const t of ['before','after']){
   const src=document.querySelector('#'+t+' .box img').src;
-  await api(Object.assign({type:t,name:base()+'_'+t+'_'+ts+'.jpg',data:src.split(',')[1]},meta));
+  await api(Object.assign({type:t,name:photoBase()+'_'+t+'_'+ts+'.jpg',data:src.split(',')[1]},meta));
  }
 }
 
@@ -315,14 +315,21 @@ function checkedCodes(id,list,map){
 }
 
 function finalName(){
- const p=last.ref.split('/');   // MSB/FL/dept/disc/yy/mm/dd/no
+ const p=last.ref.split('/');   
  return ['MSB','FL',p[2],
   checkedCodes('area',AREA,AREA_CODE),
   checkedCodes('equip',EQUIP,EQUIP_CODE),
   p[3],p[4],p[5],p[6],p[7]].join('-');
 }
 
-// tanggal selalu 2 digit (1 -> 01), harinya tetap bebas
+function photoBase(){
+ const v=id=>$(id).value.trim().replace(/[^\w-]/g,'');
+ return ['MSB','FL',v('dept'),
+  checkedCodes('area',AREA,AREA_CODE),
+  checkedCodes('equip',EQUIP,EQUIP_CODE),
+  v('disc'),v('yy'),v('mm'),v('dd'),v('no')].join('-');
+}
+
 $('dd').addEventListener('blur',()=>{
  let v=parseInt($('dd').value.replace(/\D/g,''),10);
  if(isNaN(v)){$('dd').value='';return}
