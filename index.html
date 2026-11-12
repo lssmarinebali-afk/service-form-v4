@@ -202,7 +202,7 @@ async function uploadPhotos(list=['before']){
 
 async function makePdf(id){
  const page=$(id);
-  page.classList.add('cap','solo');
+ page.classList.add('cap','solo');
  try{
   const c=await html2canvas(page,{scale:2,backgroundColor:'#ffffff',useCORS:true});
   const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4'});
