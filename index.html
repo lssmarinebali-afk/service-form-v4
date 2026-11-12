@@ -63,8 +63,8 @@ input[readonly]{background:#f0f0f0;color:#333}
 .cap .slot+.slot,.cap .sign>div+div{border-left:1px solid #000!important;border-top:0!important}
 .cap select{-webkit-appearance:none;appearance:none}
 .cap .logo{width:190px}
-.cap #after{display:none}
-.cap .photos{grid-template-columns:1fr!important}
+.cap.solo #after{display:none}
+.cap.solo .photos{grid-template-columns:1fr!important}
 </style>
 </head>
 <body>
@@ -202,7 +202,7 @@ async function uploadPhotos(list=['before']){
 
 async function makePdf(id){
  const page=$(id);
- page.classList.add('cap');
+  page.classList.add('cap','solo');
  try{
   const c=await html2canvas(page,{scale:2,backgroundColor:'#ffffff',useCORS:true});
   const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4'});
@@ -211,7 +211,7 @@ async function makePdf(id){
   if(h>maxH){h=maxH;w=c.width*h/c.height}
   pdf.addImage(c.toDataURL('image/jpeg',.9),'JPEG',(W-w)/2,m,w,h);
   return pdf;
- }finally{page.classList.remove('cap')}
+ }finally{page.classList.remove('cap','solo')}
 }
 
   async function snap(id){
