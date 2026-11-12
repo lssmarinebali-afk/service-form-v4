@@ -124,17 +124,16 @@ input[readonly]{background:#f0f0f0;color:#333}
 <div class="page" id="p2">
  <div class="sec">Reference: <span id="ref2" style="font-weight:700">-</span></div>
  <div class="sign">
-  <div><h3>Rectified by:</h3><div class="row">
+<div><h3>Rectified by:</h3><div class="row">
    <div><label>Name</label><input type="text"></div><div><label>Date</label><input type="date"></div>
-   <div><label>Designation</label><input type="text"></div><div><label>Time</label><input type="time"></div></div></div>
-  <div><h3>Checked by:</h3><div class="row">
+   <div><label>Designation</label><input type="text"></div><div><label>Time</label><input type="time"></div></div>
+   <div style="margin-top:8px" data-html2canvas-ignore><button class="sr" onclick="saveRect()">Save (Rectified by)</button></div>
+  </div>
+<div><h3>Checked by:</h3><div class="row">
    <div><label>Name</label><input type="text"></div><div><label>Date</label><input type="date"></div>
-   <div><label>Designation</label><input type="text"></div><div><label>Time</label><input type="time"></div></div></div>
- </div>
- <div class="foot">MSB/FL/ENG/101126/v4</div>
-</div>
-
-<div class="bar"><button class="sg alt" onclick="saveSign()">Save</button></div>
+   <div><label>Designation</label><input type="text"></div><div><label>Time</label><input type="time"></div></div>
+   <div style="margin-top:8px" data-html2canvas-ignore><button class="sg alt" onclick="saveSign()">Save (Final PDF)</button></div>
+  </div>
  
 <script>
 const UPLOAD_URL='https://script.google.com/macros/s/AKfycbxV2Bhdo_xlkJ2XzIEMGHBLxs1ypPQAEuK2NaqZdoo-fAJsIyns8bIwZGK9CoPpRAYj/exec';
