@@ -115,7 +115,7 @@ input[readonly]{background:#f0f0f0;color:#333}
   <b>Rectification Done:</b>
   <textarea id="recDone" class="opt"></textarea>
 </div>
-</div>   <!-- tutup #p1, wajib ada -->
+</div>   
 
 <div class="bar">
   <button class="sv" onclick="saveReport()">Save Report</button>
@@ -147,7 +147,6 @@ const EQUIP=["Light","Light Switch","Power Outlet","AC","Fan","Exhaust Fan","Fre
 const fill=(id,list)=>$(id).innerHTML=list.map(t=>`<label><input type="checkbox"> ${t.replace(/&/g,'&amp;')}</label>`).join("");
 fill("area",AREA);fill("equip",EQUIP);
 
-// foto: kamera / galeri, dikecilkan supaya PDF tidak berat
 function shrink(file,max=1280){
  return new Promise(res=>{
   const img=new Image(),url=URL.createObjectURL(file);
@@ -179,11 +178,9 @@ document.querySelectorAll(".slot").forEach(slot=>{
  slot.querySelector('[data-k=clr]').onclick=()=>box.innerHTML="<span>Belum ada foto</span>";
 });
 
-// tanda merah hilang begitu kolom diisi
 document.addEventListener('input',e=>e.target.classList.remove('err'));
 document.addEventListener('change',e=>{const g=e.target.closest('.grid');if(g)g.classList.remove('err')});
 
-// kode referensi dari baris MSB/FL (dept-disc-tahun-bulan-tanggal-nomor)
 function refCode(){return [...document.querySelectorAll('.msb input,.msb select')].map(i=>i.value.trim().replace(/[^\w-]/g,'')).join('-')||'form'}
 const base=()=>'MSB-FL-'+refCode();
 async function api(body){
@@ -248,7 +245,6 @@ async function downloadPdf(){
  }
 }
 
-// cek isian satu halaman (p1 atau p2); true kalau sudah lengkap
 function lengkap(id){
  document.querySelectorAll('.err').forEach(e=>e.classList.remove('err'));
  const bad=[];
@@ -269,7 +265,6 @@ function lengkap(id){
  return true;
 }
 
-// tombol sibuk / normal kembali
 function busy(sel,on,txt){
  document.querySelectorAll(sel).forEach(b=>{
   if(on){b.dataset.t=b.textContent;b.disabled=true;b.textContent=txt}
@@ -277,8 +272,8 @@ function busy(sel,on,txt){
  });
 }
 
-let N=0;      // nomor yang sudah diambil; dipakai ulang kalau simpan gagal di tengah jalan
-let last=null; // data halaman 1 yang sudah di-Download, dipakai oleh tombol Save
+let N=0;     
+let last=null; 
 
 const FIELDS='#p1 input[type=text]:not(#no),#p1 input[type=date],#p1 input[type=time],#p1 textarea';
 const imgSrc=k=>{const i=document.querySelector('#'+k+' .box img');return i?i.src:''};
@@ -348,14 +343,19 @@ async function saveReport(){
   $('no').value=pad(N);
 
   const noRef='MSB/FL/'+refCode().replace(/-/g,'/');
-  const pdf=await makePdf('p1');   // tampilan penuh halaman 1
+  const pdf=await makePdf('p1');  
 
   const meta={dept:$('dept').value,disc:$('disc').value,year:$('yy').value,month:$('mm').value};
-
-   const picked=id=>[...$(id).querySelectorAll('label')].filter(l=>l.querySelector('input').checked).map(l=>l.textContent.trim()).join(', ');
-   function equipText(){const o=$('equip').parentElement.querySelector('input.opt').value.trim();return [picked('equip'),o&&'Other: '+o].filter(Boolean).join(', ')}
-       await uploadPhotos();
-   const result=await api(Object.assign({
+  
+  const photosP=uploadPhotos();      
+  photosP.catch(()=>{});            
+  const pdf=await makePdf('p1');    
+  await photosP;                     
+  
+  const picked=id=>[...$(id).querySelectorAll('label')].filter(l=>l.querySelector('input').checked).map(l=>l.textContent.trim()).join(', ');
+  function equipText(){const o=$('equip').parentElement.querySelector('input.opt').value.trim();return [picked('equip'),o&&'Other: '+o].filter(Boolean).join(', ')}
+  
+  const result=await api(Object.assign({
    action:'createReport',
    noRef:noRef,
    status:'OPEN',
@@ -366,7 +366,6 @@ async function saveReport(){
    data:pdf.output('datauristring').split(',')[1],
    state:collectState()
   },meta));
-
   last={ref:result.noRef||noRef, reportLink:result.reportLink, meta:meta};
   $('ref2').textContent=last.ref;
   alert('REPORT SAVED!\n\nReference:\n'+last.ref);
@@ -407,7 +406,6 @@ async function saveSign(){
  }
 }
   
-// nomor berikutnya sesuai Dept + Discipline yang dipilih (preview), mencoba ulang tiap 5 detik kalau gagal
 let nextReq=0;
 function loadNext(){
  const id=++nextReq;
