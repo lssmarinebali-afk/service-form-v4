@@ -63,6 +63,24 @@ input[readonly]{background:#f0f0f0;color:#333}
 .cap .slot+.slot,.cap .sign>div+div{border-left:1px solid #000!important;border-top:0!important}
 .cap select{-webkit-appearance:none;appearance:none}
 .cap .logo{width:190px}
+.row>div{min-width:0}
+input[type=text],input[type=date],input[type=time]{
+  min-width:0;
+  height:36px;
+  line-height:22px;
+  -webkit-appearance:none;
+  appearance:none;
+  display:block;
+}
+input[type=date],input[type=time]{
+  text-align:left;
+  background:#fff;
+}
+input[type=date]::-webkit-date-and-time-value,
+input[type=time]::-webkit-date-and-time-value{
+  text-align:left;
+  min-height:22px;
+}
 .cap.solo #after{display:none}
 .cap.solo .photos{grid-template-columns:1fr!important}
 </style>
