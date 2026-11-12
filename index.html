@@ -225,11 +225,31 @@ async function uploadPhotos(list=['before']){
  }));
 }
 
+// ganti input/select/textarea jadi div (hanya di salinan untuk PDF) supaya teks tidak terpotong
+function flatten(doc){
+ doc.querySelectorAll('input[type=text],input[type=date],input[type=time],select,textarea').forEach(el=>{
+  const cs=doc.defaultView.getComputedStyle(el);
+  const d=doc.createElement('div');
+  const isTA=el.tagName==='TEXTAREA';
+  d.textContent=el.tagName==='SELECT'?(el.options[el.selectedIndex]||{}).text||'':el.value;
+  d.style.cssText=
+   'box-sizing:border-box;overflow:hidden;background:#fff;'+
+   'width:'+cs.width+';height:'+cs.height+';'+
+   'border:'+cs.borderTopWidth+' solid '+cs.borderTopColor+';border-radius:'+cs.borderTopLeftRadius+';'+
+   'padding:'+cs.padding+';font:'+cs.font+';color:#111;'+
+   (isTA
+    ?'display:block;white-space:pre-wrap;word-break:break-word;line-height:1.35;'
+    :'display:flex;align-items:center;white-space:nowrap;justify-content:'+(cs.textAlign==='center'?'center':'flex-start')+';');
+  el.replaceWith(d);
+ });
+}
+const H2C={scale:2,backgroundColor:'#ffffff',useCORS:true,onclone:flatten};
+  
 async function makePdf(id){
  const page=$(id);
  page.classList.add('cap','solo');
  try{
-  const c=await html2canvas(page,{scale:2,backgroundColor:'#ffffff',useCORS:true});
+  const c=await html2canvas(page,H2C);
   const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4'});
   const W=210,H=297,m=8,maxW=W-2*m,maxH=H-2*m;
   let w=maxW,h=c.height*w/c.width;
@@ -242,7 +262,7 @@ async function makePdf(id){
   async function snap(id){
  const page=$(id);
  page.classList.add('cap');
- try{ return await html2canvas(page,{scale:2,backgroundColor:'#ffffff',useCORS:true}); }
+ try{ return await html2canvas(page,H2C); }
  finally{ page.classList.remove('cap'); }
 }
 
