@@ -347,7 +347,8 @@ async function saveReport(){
 
    const picked=id=>[...$(id).querySelectorAll('label')].filter(l=>l.querySelector('input').checked).map(l=>l.textContent.trim()).join(', ');
    function equipText(){const o=$('equip').parentElement.querySelector('input.opt').value.trim();return [picked('equip'),o&&'Other: '+o].filter(Boolean).join(', ')}
-    const result=await api(Object.assign({
+       await uploadPhotos();
+   const result=await api(Object.assign({
    action:'createReport',
    noRef:noRef,
    status:'OPEN',
