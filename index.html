@@ -246,7 +246,9 @@ const H2C={scale:2,backgroundColor:'#ffffff',useCORS:true,onclone:flatten};
   
 async function makePdf(id){
  const page=$(id);
- page.classList.add('cap','solo');
+ const hasAfter=!!document.querySelector('#after .box img');
+ page.classList.add('cap');
+ if(!hasAfter)page.classList.add('solo');
  try{
   const c=await html2canvas(page,H2C);
   const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4'});
@@ -403,7 +405,8 @@ async function saveReport(){
 
    const picked=id=>[...$(id).querySelectorAll('label')].filter(l=>l.querySelector('input').checked).map(l=>l.textContent.trim()).join(', ');
    function equipText(){const o=$('equip').parentElement.querySelector('input.opt').value.trim();return [picked('equip'),o&&'Other: '+o].filter(Boolean).join(', ')}
-       await uploadPhotos();
+   const hasAfter=!!document.querySelector('#after .box img');
+   await uploadPhotos(hasAfter?['before','after']:['before']);
    const result=await api(Object.assign({
    action:'createReport',
    noRef:noRef,
@@ -411,6 +414,7 @@ async function saveReport(){
    area:picked('area'),
    equip:equipText(),
    recDone:$('recDone').value.trim(),
+   hasAfter:hasAfter,
    name:base()+'.pdf',
    data:pdf.output('datauristring').split(',')[1],
    state:collectState()
