@@ -158,6 +158,7 @@ input[type=time]::-webkit-date-and-time-value{
 <div class="bar">
  <button class="dl" onclick="downloadPdf()">Download PDF</button>
  <button class="clr" id="rst" style="display:none" onclick="resetNo()">Reset No ke 001</button>
+ <button class="clr" id="rst2" style="display:none;background:#c62828" onclick="resetSemua()">HAPUS SEMUA DATA</button>
 </div>
 
 <script>
@@ -500,8 +501,8 @@ async function saveSign(){
  }
 }
 
-if(new URLSearchParams(location.search).get('admin')==='1')$('rst').style.display='';
-
+if(new URLSearchParams(location.search).get('admin')==='1'){$('rst').style.display='';$('rst2').style.display='';}
+  
 async function resetNo(){
  const pin=prompt('Masukkan PIN untuk reset nomor:');
  if(!pin)return;
@@ -514,6 +515,25 @@ async function resetNo(){
  }catch(e){
   console.error(e);
   alert('Gagal reset: '+e.message);
+ }
+}
+  
+async function resetSemua(){
+ const pin=prompt('Masukkan PIN admin:');
+ if(!pin)return;
+ const k=prompt('Ini akan MENGHAPUS semua laporan di sheet, semua file di Drive, dan mereset nomor ke 001.\n\nKetik HAPUS untuk lanjut:');
+ if(k!=='HAPUS')return;
+ busy('#rst2',true,'Menghapus...');
+ try{
+  await api({action:'resetAll',pin:pin});
+  N=0;
+  loadNext();
+  alert('Selesai. Sheet kosong, Drive dibersihkan, nomor mulai dari 001.');
+ }catch(e){
+  console.error(e);
+  alert('Gagal: '+e.message);
+ }finally{
+  busy('#rst2',false);
  }
 }
   
